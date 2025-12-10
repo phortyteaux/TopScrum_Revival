@@ -11,24 +11,34 @@ export default function Decks() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchDecks() {
-      setLoading(true);
-      setError(null);
+  async function fetchDecks() {
+    setLoading(true);
+    setError(null);
 
-      const { data, error } = await supabase
-        .from('decks')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('decks')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
 
-      if (error) setError(error.message);
-      else setDecks(data ?? []);
-
-      setLoading(false);
+    if (error) {
+      console.error('Error loading decks:', error);
+      // Optional: special-case the missing-table error
+      if (error.message?.includes("Could not find the table 'public.decks'")) {
+        setError('Decks are not set up yet. Please contact the developer.');
+      } else {
+        setError('Could not load decks. Please try again later.');
+      }
+    } else {
+      setDecks(data ?? []);
     }
 
-    if (user) fetchDecks();
-  }, [user]);
+    setLoading(false);
+  }
+
+  if (user) fetchDecks();
+}, [user]);
+
 
   return (
     <div className="mt-4">
