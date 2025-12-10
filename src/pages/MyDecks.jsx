@@ -237,8 +237,15 @@ export default function MyDecks() {
               border: "1px solid #ccc",
               borderRadius: "8px",
               background: "#fafafa",
+              cursor: "pointer",
+            }}
+            onClick={(e) => {
+              // Prevent click if user clicked button or checkbox
+              if (e.target.tagName === "BUTTON" || e.target.type === "checkbox") return;
+              window.location.href = `/deck/${deck.id}`;
             }}
           >
+
             {/* CHECKBOX FOR BULK SELECT */}
             <input
               type="checkbox"
@@ -262,12 +269,6 @@ export default function MyDecks() {
                 </button>
               </a>
 
-              <a href={`/deck/${deck.id}/edit`}>
-                <button style={{ backgroundColor: "orange", color: "white" }}>
-                  Edit
-                </button>
-              </a>
-
               <button
                 onClick={() => deleteDeck(deck.id)}
                 style={{ backgroundColor: "red", color: "white" }}
@@ -275,12 +276,6 @@ export default function MyDecks() {
                 Delete
               </button>
 
-              <button
-                onClick={() => exportDeck(deck)}
-                style={{ backgroundColor: "gray", color: "white" }}
-              >
-                Export
-              </button>
             </div>
           </li>
         ))}

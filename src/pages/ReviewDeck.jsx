@@ -3,19 +3,21 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 
 export default function ReviewDeck() {
-  const { id } = useParams(); // deck ID
+  const { id } = useParams();
 
-  // Cards & review state
   const [cards, setCards] = useState([]);
-  const [index, setIndex] = useState(0); 
+  const [index, setIndex] = useState(0);
   const [showBack, setShowBack] = useState(false);
 
-  // Session stats
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCount, setIncorrectCount] = useState(0);
-  const [finished, setFinished] = useState(false); 
+  const [finished, setFinished] = useState(false);
 
-  // Load cards from DB
+  const [shuffle, setShuffle] = useState(false);
+
+  // ---------------------------------------------------------
+  // LOAD CARDS
+  // ---------------------------------------------------------
   useEffect(() => {
     async function loadCards() {
       const { data, error } = await supabase
@@ -23,68 +25,47 @@ export default function ReviewDeck() {
         .select("*")
         .eq("deck_id", id);
 
-      if (!error) {
-        // Shuffle cards
-        const shuffled = data.sort(() => Math.random() - 0.5);
-        setCards(shuffled);
+      if (!error && data) {
+        let loaded = [...data];
+
+        if (shuffle) {
+          loaded = loaded.sort(() => Math.random() - 0.5);
+        }
+
+        setCards(loaded);
       }
     }
 
     loadCards();
-  }, [id]);
+  }, [id, shuffle]);
 
-  // While loading or empty
-  if (cards.length === 0) return <p style={{ padding: 20 }}>No cards to review.</p>;
-
-  const card = cards[index];
-
-  // Move to next card OR finish review
-  function nextCard() {
-    setShowBack(false);
-
-    if (index === cards.length - 1) {
-      setFinished(true); // show results page
-    } else {
-      setIndex(index + 1);
-    }
-  }
-
-  // Mark card correct
-  async function markCorrect(cardId) {
-    setCorrectCount(correctCount + 1);
-
-    // Update DB long-term stats
-    await supabase
-      .from("cards")
-      .update({
-        attempts: (card.attempts || 0) + 1,
-        correct: (card.correct || 0) + 1
-      })
-      .eq("id", cardId);
-
-    nextCard();
-  }
-
-  // Mark card incorrect
-  async function markIncorrect(cardId) {
-    setIncorrectCount(incorrectCount + 1);
-
-    await supabase
-      .from("cards")
-      .update({
-        attempts: (card.attempts || 0) + 1,
-        incorrect: (card.incorrect || 0) + 1
-      })
-      .eq("id", cardId);
-
-    nextCard();
-  }
-
+  // ---------------------------------------------------------
   // FINAL RESULTS SCREEN
+  // ---------------------------------------------------------
   if (finished) {
     return (
       <div style={{ padding: 20, textAlign: "center" }}>
         <h2>Review Complete!</h2>
+
+        {/* 100% Progress Bar */}
+        <div
+          style={{
+            width: "80%",
+            height: "12px",
+            backgroundColor: "#ddd",
+            borderRadius: "6px",
+            margin: "10px auto 20px auto",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              height: "100%",
+              width: "100%",
+              backgroundColor: "purple",
+            }}
+          />
+        </div>
 
         <p>
           You got <strong>{correctCount}</strong> correct and{" "}
@@ -93,10 +74,11 @@ export default function ReviewDeck() {
 
         <p style={{ fontSize: "24px", marginTop: 10 }}>
           Score:{" "}
-          <strong>{Math.round((correctCount / cards.length) * 100)}%</strong>
+          <strong>
+            {Math.round((correctCount / cards.length) * 100)}%
+          </strong>
         </p>
 
-        {/* Restart button */}
         <button
           onClick={() => {
             setCorrectCount(0);
@@ -118,7 +100,6 @@ export default function ReviewDeck() {
           Restart Review
         </button>
 
-        {/* Back to deck */}
         <div style={{ marginTop: 20 }}>
           <a href={`/deck/${id}`}>
             <button
@@ -139,15 +120,108 @@ export default function ReviewDeck() {
     );
   }
 
+  if (cards.length === 0)
+    return <p style={{ padding: 20 }}>No cards to review.</p>;
+
+  const card = cards[index];
+
+  // ---------------------------------------------------------
+  // PROGRESS BAR CALCULATION (fixed)
+  // ---------------------------------------------------------
+  const progress =
+    cards.length > 0 ? (index / cards.length) * 100 : 0;
+
+  // ---------------------------------------------------------
+  // NEXT CARD LOGIC
+  // ---------------------------------------------------------
+  function nextCard() {
+    setShowBack(false);
+
+    if (index === cards.length - 1) {
+      setFinished(true);
+    } else {
+      setIndex(index + 1);
+    }
+  }
+
+  async function markCorrect(cardId) {
+    setCorrectCount(correctCount + 1);
+
+    await supabase
+      .from("cards")
+      .update({
+        attempts: (card.attempts || 0) + 1,
+        correct: (card.correct || 0) + 1,
+      })
+      .eq("id", cardId);
+
+    nextCard();
+  }
+
+  async function markIncorrect(cardId) {
+    setIncorrectCount(incorrectCount + 1);
+
+    await supabase
+      .from("cards")
+      .update({
+        attempts: (card.attempts || 0) + 1,
+        incorrect: (card.incorrect || 0) + 1,
+      })
+      .eq("id", cardId);
+
+    nextCard();
+  }
+
+  // ---------------------------------------------------------
   // NORMAL REVIEW SCREEN
+  // ---------------------------------------------------------
   return (
     <div style={{ padding: 20, textAlign: "center" }}>
       <h2>Reviewing Deck</h2>
-      <p>
+
+      {/* SHUFFLE TOGGLE */}
+      <label style={{ display: "block", marginBottom: "15px" }}>
+        <input
+          type="checkbox"
+          checked={shuffle}
+          onChange={(e) => {
+            setShuffle(e.target.checked);
+            setIndex(0);
+            setFinished(false);
+            setCorrectCount(0);
+            setIncorrectCount(0);
+          }}
+          style={{ marginRight: "8px" }}
+        />
+        Shuffle Cards
+      </label>
+
+      {/* FIXED PROGRESS BAR */}
+      <div
+        style={{
+          width: "80%",
+          height: "12px",
+          backgroundColor: "#ddd",
+          borderRadius: "6px",
+          margin: "10px auto 20px auto",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            width: `${progress}%`,
+            backgroundColor: "purple",
+            transition: "width 0.3s ease",
+          }}
+        />
+      </div>
+
+      <p style={{ marginBottom: 10 }}>
         Card {index + 1} of {cards.length}
       </p>
 
-      {/* Flashcard box */}
+      {/* FLASHCARD */}
       <div
         style={{
           padding: 20,
@@ -170,7 +244,7 @@ export default function ReviewDeck() {
         {showBack ? card.back_text : card.front_text}
       </div>
 
-      {/* Buttons */}
+      {/* MARK BUTTONS */}
       <button
         onClick={() => markCorrect(card.id)}
         style={{
@@ -200,9 +274,9 @@ export default function ReviewDeck() {
         Incorrect
       </button>
 
-      {/* Image below everything */}
+      {/* IMAGE BELOW */}
       {card.image_url && (
-        <div style={{ marginTop: "30px", textAlign: "center" }}>
+        <div style={{ marginTop: "30px" }}>
           <img
             src={card.image_url}
             alt="card"
