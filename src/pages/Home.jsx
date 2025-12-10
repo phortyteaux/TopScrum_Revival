@@ -36,6 +36,18 @@ export default function Home() {
           </button>
         </a>
       </div>
+	  
+      <div style={{ marginBottom: "20px", textAlign: "left" }}>
+          <h3>About us</h3>
+          <a href="https://github.com/phortyteaux/TopScrum_Revival">
+            GitHub
+          </a>
+          <br></br>
+          <a href="/demo">
+            How it works
+          </a>
+      </div>
     </div>
+
   );
 }

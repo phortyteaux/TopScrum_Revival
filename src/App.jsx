@@ -10,6 +10,7 @@ import EditDeck from "./pages/EditDeck";
 import ReviewDeck from "./pages/ReviewDeck";
 import DeckStats from "./pages/DeckStats";
 import Home from "./pages/Home";
+import Demo from "./pages/Demo"
 
 
 
@@ -28,6 +29,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/demo" element={<Demo />} />
         <Route path="/create-deck" element={<CreateDeck />} />
         <Route path="/my-decks" element={<MyDecks />} />
         <Route path="/deck/:id" element={<DeckDetails />} />
