@@ -1,3 +1,7 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { footerSections } from "./footerData";
+
 export default function Home() {
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
@@ -36,18 +40,31 @@ export default function Home() {
           </button>
         </a>
       </div>
-	  
-      <div style={{ marginBottom: "20px", textAlign: "left" }}>
-          <h3>About us</h3>
-          <a href="https://github.com/phortyteaux/TopScrum_Revival">
-            GitHub
-          </a>
-          <br></br>
-          <a href="/demo">
-            How it works
-          </a>
-      </div>
+      <Footer />
     </div>
 
   );
 }
+
+const Footer = () => {
+  return (
+    <footer className="site-footer">
+      <div className="footer-container">
+        {/* Loop through the columns */}
+        {footerSections.map((section) => (
+          <div key={section.title} className="footer-column">
+            <h4 className="column-title">{section.title}</h4>
+            <ul className="column-links">
+              {/* Loop through the links in each column */}
+              {section.links.map((link) => (
+                <li key={link.label}>
+                  <Link to={link.path}>{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </footer>
+  );
+};
