@@ -1,136 +1,174 @@
-Flashcard Learning App
-CPSC 362 – Software Engineering
-Team Members
+# 📚 Flashcard Web App — CPSC 362 Software Engineering Project
 
-John Alora
-Adan Jeronimo
-Max Kwatcher
-Sean Lowry
-Rami Semrin
-Sargun Singh
+A full-stack flashcard study application built using **React.js**, **Supabase**, and **Vite**.  
+This project focuses on real-world software engineering principles: authentication, database schema design, UI/UX, feature iteration, teamwork, and deployment.
 
-1. Overview
+---
 
-The Flashcard Learning App is a web-based studying tool that allows users to create decks, add cards, review material using multiple modes, track performance analytics, and store learning progress in the cloud. The app focuses on simplicity, accessibility, and efficiency for students who want a customizable study experience.
+## 👥 Group Members
+- **John Alora**
+- **Adan Jeronimo**
+- **Max Kwatcher**
+- **Sean Lowry**
+- **Rami Semrin**
+- **Sargun Singh**
 
-2. Key Features
+---
 
-– User authentication (signup/login)
-– Create, edit, delete decks
-– Add cards with text and optional images
-– Review mode with progress bar
-– Shuffle mode
-– Track card attempts, correctness, and accuracy
-– Review incorrect cards only
-– Starred (favorite) cards
-– Deck analytics dashboard (statistics + hardest cards)
-– Bulk deck actions: import, export (JSON), delete, ZIP export
-– Search for decks and search within a deck
-– Upload images via Supabase Storage
+## 🚀 Project Overview
 
-3. Architecture Diagram (High-Level)
+Our web application allows users to:
 
-Frontend → React.js (Vite)
-Backend → Supabase (Auth, Database, Storage)
-Database → PostgreSQL on Supabase
-Hosting → Vercel (optional; instructor-dependent)
+- Create, edit, and organize flashcard decks  
+- Practice through Review Mode with progress tracking  
+- Upload images to cards  
+- Export & import decks as JSON  
+- View study analytics and hardest cards  
+- Shuffle cards, filter starred cards, and more  
 
-Main system components:
-– Authentication Service
-– Deck service (CRUD)
-– Card service (CRUD + analytics logging)
-– Review engine
-– Analytics engine
-– Storage bucket for images
+Built with modern tools and real database integration, this project demonstrates full-stack engineering practices suitable for production-level applications.
 
-(A proper diagram can be added using draw.io or diagrams.net before submission.)
+---
 
-4. Tech Stack
+## 🛠️ Tech Stack
 
-Frontend: React.js, Vite, JavaScript
-Backend-as-a-Service: Supabase
-Database: PostgreSQL
-Storage: Supabase Storage
-UI Libraries: Custom CSS (Tailwind optional)
-Build Tools: Node.js, Vite
-Version Control: Git/GitHub
+**Frontend:** React.js (Vite), JavaScript, JSX  
+**Backend:** Supabase (PostgreSQL, Auth, Storage)  
+**Storage:** Supabase Storage for images  
+**Build Tools:** Vite  
+**Deployment:** (to be added by team — Netlify / Vercel recommended)
 
-5. Code Structure
+---
 
+## 🌟 Key Features Implemented
+
+### 1. Deck Management
+- Create, edit, delete decks  
+- Add unlimited cards to any deck  
+- Search decks by title  
+- Import decks via JSON file  
+- Export individual decks  
+- Bulk export multiple decks as ZIP  
+- Bulk delete multiple decks  
+
+### 2. Card Management
+- Create, edit, delete cards  
+- Upload images to cards  
+- Edit card images and text  
+- Filter cards by search  
+- Star / unstar cards (favorites system)  
+
+### 3. Review Mode
+- Flip cards  
+- Mark correct / incorrect  
+- Shuffle mode  
+- Track attempts, correct count, incorrect count  
+- Second-chance review: review incorrect-only cards  
+- Image display in review  
+- Auto-progress bar with completion screen  
+
+### 4. Deck Analytics Dashboard (Stats Page)
+- Total cards  
+- Total attempts  
+- Correct vs. incorrect  
+- Overall accuracy (%)  
+- Count of starred cards  
+- Hardest cards detection (least accurate with ≥3 attempts)  
+- Table of hardest cards  
+
+### 5. Import / Export System
+- Export deck with all cards as JSON  
+- Import JSON and auto-recreate deck + cards  
+- Bulk export selected decks as a downloadable ZIP  
+
+---
+
+## 📂 Project Structure
+
+```
 src/
-– pages/
- • Login.jsx
- • Signup.jsx
- • MyDecks.jsx
- • DeckDetails.jsx
- • ReviewDeck.jsx
- • EditDeck.jsx
- • AddCard.jsx
- • EditCard.jsx
- • DeckStats.jsx
-– context/
- • AuthContext.jsx
-– lib/
- • supabaseClient.js
-App.jsx
-main.jsx
+ ├── pages/
+ │    ├── MyDecks.jsx
+ │    ├── DeckDetails.jsx
+ │    ├── AddCard.jsx
+ │    ├── EditCard.jsx
+ │    ├── ReviewDeck.jsx
+ │    ├── DeckStats.jsx
+ │    └── EditDeck.jsx
+ │
+ ├── components/
+ │    └── Navbar.jsx
+ │
+ ├── context/
+ │    └── AuthContext.jsx
+ │
+ ├── lib/
+ │    └── supabaseClient.js
+ │
+ └── App.jsx
+```
 
-6. Algorithms & Logic Highlights
+---
 
-– Card shuffle uses randomized array shuffling
-– Review engine updates card correctness and attempts
-– Incorrect-only mode dynamically rebuilds the review list
-– Analytics computation aggregates attempts, effectiveness, and hardest cards
-– Bulk export uses JSZip + FileSaver
-– Image upload uses Supabase Storage signed URLs
+## 🧪 How to Run Locally
 
-7. Test Plan (Summary)
+### 1. Install dependencies
+```
+npm install
+```
 
-Testing includes:
-– Functional testing of CRUD operations
-– Authentication workflow
-– Image upload tests
-– Review mode logic correctness
-– Analytics accuracy
-– JSON import/export integrity
-– UI validation and error handling
+### 2. Start development server
+```
+npm run dev
+```
 
-(Full test cases should be included in the final documentation per instructor guidelines.)
+### 3. Set up environment variables  
+Create a `.env` file in the project root:
 
-8. Deployment Instructions
+```
+VITE_SUPABASE_URL=your_url_here
+VITE_SUPABASE_ANON_KEY=your_key_here
+```
 
-Clone repository
+---
 
-Install dependencies
- npm install
+## 🗄️ Database Schema (Supabase)
 
-Create a .env or use Vite environment variables:
- VITE_SUPABASE_URL=xxx
- VITE_SUPABASE_ANON_KEY=xxx
+### Table: decks
+```
+id (uuid) PK
+user_id (uuid)
+title (text)
+description (text)
+created_at (timestamp)
+```
 
-Start dev server
- npm run dev
+### Table: cards
+```
+id (uuid) PK
+deck_id (uuid) FK
+front_text (text)
+back_text (text)
+image_url (text)
+starred (boolean, default false)
+attempts (int, default 0)
+correct (int, default 0)
+incorrect (int, default 0)
+```
 
-Optional: Deploy to Vercel
+---
 
-Deployment diagram should describe user → frontend → Supabase interactions as required by CPSC 362 guidelines.
+## 🧑‍🤝‍🧑 Project Responsibilities (Suggested)
+- Frontend (React UI Components)
+- Supabase Integration
+- Data Modeling & Queries
+- Review Mode Logic
+- Stats Dashboard
+- Import/Export System
+- Documentation & Testing
 
-9. Future Improvements
+---
 
-– UI/UX redesign with Tailwind / Material UI
-– Spaced repetition algorithm (e.g., SM-2)
-– Mobile version (React Native)
-– Collaborating on shared decks
-– AI-generated practice questions
-– Audio flashcards
-– Offline mode
+## 📄 License
+This project is for educational purposes under the CPSC 362 Software Engineering course.
 
-10. References
-
-– CPSC 362 Project Guidelines 
-
-CPSC 362 - Project final delver…
-
-
-– Supabase documentation
-– React and Vite documentation
