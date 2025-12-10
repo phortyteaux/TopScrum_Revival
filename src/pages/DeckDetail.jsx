@@ -17,11 +17,13 @@ export default function DeckDetail() {
       setLoading(true);
       setError(null);
 
-      const [{ data: deckData, error: deckError }, { data: cardsData, error: cardsError }] =
-        await Promise.all([
-          supabase.from('decks').select('*').eq('id', deckId).single(),
-          supabase.from('cards').select('*').eq('deck_id', deckId).order('created_at'),
-        ]);
+      const [
+        { data: deckData, error: deckError },
+        { data: cardsData, error: cardsError },
+      ] = await Promise.all([
+        supabase.from('decks').select('*').eq('id', deckId).single(),
+        supabase.from('cards').select('*').eq('deck_id', deckId).order('created_at'),
+      ]);
 
       if (deckError) setError(deckError.message);
       if (cardsError) setError((prev) => prev || cardsError.message);
@@ -71,17 +73,64 @@ export default function DeckDetail() {
     else setCards((prev) => prev.filter((c) => c.id !== cardId));
   };
 
+  // --- Export this deck as a single JSON file ---
+  const handleExportDeck = () => {
+    if (!deck) return;
+
+    const payload = {
+      deck: {
+        id: deck.id,
+        title: deck.title,
+        description: deck.description,
+        created_at: deck.created_at,
+      },
+      cards: cards.map((c) => ({
+        front: c.front,
+        back: c.back,
+      })),
+    };
+
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+
+    const safeTitle =
+      (deck.title || 'deck')
+        .toLowerCase()
+        .replace(/[^\w\-]+/g, '_')
+        .slice(0, 50) || 'deck';
+
+    const filename = `${safeTitle}_${deck.id}.json`;
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) return <div className="p-4">Loading deck...</div>;
   if (!deck) return <div className="p-4">Deck not found.</div>;
 
   return (
     <div className="mt-4">
-      <h1 className="text-2xl font-semibold mb-1">{deck.title}</h1>
-      {deck.description && (
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          {deck.description}
-        </p>
-      )}
+      <div className="flex items-start justify-between gap-4 mb-2">
+        <div>
+          <h1 className="text-2xl font-semibold mb-1">{deck.title}</h1>
+          {deck.description && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+              {deck.description}
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={handleExportDeck}
+          className="px-3 py-1 rounded-md border border-gray-300 dark:border-gray-700 text-xs sm:text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        >
+          Export Deck (JSON)
+        </button>
+      </div>
 
       {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
 
