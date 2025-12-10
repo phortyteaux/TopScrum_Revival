@@ -9,36 +9,74 @@ export default function Decks() {
   const [decks, setDecks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
-  async function fetchDecks() {
-    setLoading(true);
-    setError(null);
+    async function fetchDecks() {
+      setLoading(true);
+      setError(null);
 
-    const { data, error } = await supabase
-      .from('decks')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('decks')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading decks:', error);
-      // Optional: special-case the missing-table error
-      if (error.message?.includes("Could not find the table 'public.decks'")) {
-        setError('Decks are not set up yet. Please contact the developer.');
+      if (error) {
+        console.error('Error loading decks:', error);
+        // Optional: special-case the missing-table error
+        if (error.message?.includes("Could not find the table 'public.decks'")) {
+          setError('Decks are not set up yet. Please contact the developer.');
+        } else {
+          setError('Could not load decks. Please try again later.');
+        }
       } else {
-        setError('Could not load decks. Please try again later.');
+        setDecks(data ?? []);
       }
-    } else {
-      setDecks(data ?? []);
+
+      setLoading(false);
     }
 
-    setLoading(false);
-  }
+    if (user) fetchDecks();
+  }, [user]);
 
-  if (user) fetchDecks();
-}, [user]);
+  const handleDeleteDeck = async (deckId) => {
+    if (!window.confirm('Delete this deck and all its cards?')) return;
 
+    setError(null);
+    setDeletingId(deckId);
+
+    // Delete cards first (in case DB doesn’t have cascading foreign keys)
+    const { error: cardsError } = await supabase
+      .from('cards')
+      .delete()
+      .eq('deck_id', deckId);
+
+    if (cardsError) {
+      console.error(cardsError);
+      setError(cardsError.message);
+      setDeletingId(null);
+      return;
+    }
+
+    // Then delete the deck itself
+    const { error: deckError } = await supabase
+      .from('decks')
+      .delete()
+      .eq('id', deckId)
+      .eq('user_id', user.id);
+
+    if (deckError) {
+      console.error(deckError);
+      setError(deckError.message);
+      setDeletingId(null);
+      return;
+    }
+
+    // Optimistically update UI
+    setDecks((prev) => prev.filter((d) => d.id !== deckId));
+    setDeletingId(null);
+  };
 
   return (
     <div className="mt-4">
@@ -75,7 +113,7 @@ export default function Decks() {
                 </p>
               )}
             </div>
-            <div className="flex gap-3 text-xs sm:text-sm">
+            <div className="flex gap-3 text-xs sm:text-sm items-center">
               <Link
                 to={`/decks/${deck.id}`}
                 className="underline hover:text-brand"
@@ -94,6 +132,13 @@ export default function Decks() {
               >
                 Review
               </Link>
+              <button
+                onClick={() => handleDeleteDeck(deck.id)}
+                disabled={deletingId === deck.id}
+                className="underline text-red-600 hover:text-red-700 disabled:opacity-50"
+              >
+                {deletingId === deck.id ? 'Deleting…' : 'Delete'}
+              </button>
             </div>
           </div>
         ))}
