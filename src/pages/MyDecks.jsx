@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
-import JSZip from "jszip"; // ⬅ NEW: For bulk export ZIP
-import { saveAs } from "file-saver"; // ⬅ NEW: For downloading ZIP
+import JSZip from "jszip"; // For bulk export ZIP
+import { saveAs } from "file-saver"; // For downloading ZIP
 
 export default function MyDecks() {
   const { user } = useAuth();
   const [decks, setDecks] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectedDecks, setSelectedDecks] = useState([]); // ⬅ NEW for bulk actions
+  const [selectedDecks, setSelectedDecks] = useState([]); // bulk actions
+  const [draggedDeckId, setDraggedDeckId] = useState(null); // DnD
 
   // ---------------------------------------------------------
   // EXPORT ONE DECK AS JSON
@@ -81,19 +82,23 @@ export default function MyDecks() {
         .insert({
           user_id: user.id,
           title: data.title,
-          description: data.description,
+          description: data.description
+          // order_index will be set by backfill or when you reorder
         })
         .select()
         .single();
 
-      const cardInserts = data.cards.map((card) => ({
+      const cardInserts = (data.cards || []).map((card) => ({
         deck_id: newDeck.id,
         front_text: card.front_text,
         back_text: card.back_text,
         image_url: card.image_url,
+        // same idea for order_index – you can keep as null; will be handled on reorder
       }));
 
-      await supabase.from("cards").insert(cardInserts);
+      if (cardInserts.length > 0) {
+        await supabase.from("cards").insert(cardInserts);
+      }
 
       alert("Deck imported!");
       window.location.reload();
@@ -107,16 +112,25 @@ export default function MyDecks() {
   // ---------------------------------------------------------
   useEffect(() => {
     async function loadDecks() {
-      const { data } = await supabase
+      if (!user) return;
+
+      const { data, error } = await supabase
         .from("decks")
         .select("*")
         .eq("user_id", user.id)
+        // First by order_index (manual), then by created_at for any nulls
+        .order("order_index", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false });
 
-      setDecks(data);
+      if (error) {
+        console.error("Error loading decks:", error);
+        return;
+      }
+
+      setDecks(data || []);
     }
 
-    if (user) loadDecks();
+    loadDecks();
   }, [user]);
 
   // SEARCH filtering
@@ -132,8 +146,8 @@ export default function MyDecks() {
     if (!ok) return;
 
     await supabase.from("decks").delete().eq("id", id);
-    setDecks(decks.filter((d) => d.id !== id));
-    setSelectedDecks(selectedDecks.filter((x) => x !== id));
+    setDecks((prev) => prev.filter((d) => d.id !== id));
+    setSelectedDecks((prev) => prev.filter((x) => x !== id));
   }
 
   // ---------------------------------------------------------
@@ -147,17 +161,15 @@ export default function MyDecks() {
 
     await supabase.from("decks").delete().in("id", selectedDecks);
 
-    setDecks(decks.filter((d) => !selectedDecks.includes(d.id)));
+    setDecks((prev) => prev.filter((d) => !selectedDecks.includes(d.id)));
     setSelectedDecks([]);
   }
 
   // TOGGLE SELECTED CHECKBOXES
   function toggleDeck(id) {
-    if (selectedDecks.includes(id)) {
-      setSelectedDecks(selectedDecks.filter((x) => x !== id));
-    } else {
-      setSelectedDecks([...selectedDecks, id]);
-    }
+    setSelectedDecks((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   }
 
   function selectAll() {
@@ -166,6 +178,48 @@ export default function MyDecks() {
 
   function clearSelection() {
     setSelectedDecks([]);
+  }
+
+  // ---------------------------------------------------------
+  // DRAG-AND-DROP HELPERS FOR DECKS
+  // ---------------------------------------------------------
+  function handleDeckDragStart(id) {
+    setDraggedDeckId(id);
+  }
+
+  function handleDeckDragOver(e, overId) {
+    e.preventDefault();
+    if (!draggedDeckId || draggedDeckId === overId) return;
+
+    setDecks((prev) => {
+      const arr = [...prev];
+      const fromIndex = arr.findIndex((d) => d.id === draggedDeckId);
+      const toIndex = arr.findIndex((d) => d.id === overId);
+      if (fromIndex === -1 || toIndex === -1) return prev;
+
+      const [moved] = arr.splice(fromIndex, 1);
+      arr.splice(toIndex, 0, moved);
+      return arr;
+    });
+  }
+
+  async function handleDeckDropOrEnd() {
+    if (!draggedDeckId) return;
+    setDraggedDeckId(null);
+
+    // Persist order_index based on current order in `decks`
+    const updates = decks.map((deck, idx) => ({
+      id: deck.id,
+      order_index: idx
+    }));
+
+    const { error } = await supabase
+      .from("decks")
+      .upsert(updates, { onConflict: "id" });
+
+    if (error) {
+      console.error("Error saving deck order:", error);
+    }
   }
 
   // ---------------------------------------------------------
@@ -184,7 +238,7 @@ export default function MyDecks() {
           backgroundColor: "#444",
           color: "white",
           borderRadius: "6px",
-          cursor: "pointer",
+          cursor: "pointer"
         }}
       >
         Import Deck
@@ -222,7 +276,7 @@ export default function MyDecks() {
           margin: "10px 0 20px 0",
           border: "1px solid gray",
           borderRadius: "6px",
-          display: "block",
+          display: "block"
         }}
       />
 
@@ -230,6 +284,11 @@ export default function MyDecks() {
         {filteredDecks.map((deck) => (
           <li
             key={deck.id}
+            draggable
+            onDragStart={() => handleDeckDragStart(deck.id)}
+            onDragOver={(e) => handleDeckDragOver(e, deck.id)}
+            onDrop={handleDeckDropOrEnd}
+            onDragEnd={handleDeckDropOrEnd}
             style={{
               listStyle: "none",
               marginBottom: "20px",
@@ -237,15 +296,18 @@ export default function MyDecks() {
               border: "1px solid #ccc",
               borderRadius: "8px",
               background: "#fafafa",
-              cursor: "pointer",
+              cursor: "grab"
             }}
             onClick={(e) => {
               // Prevent click if user clicked button or checkbox
-              if (e.target.tagName === "BUTTON" || e.target.type === "checkbox") return;
+              if (
+                e.target.tagName === "BUTTON" ||
+                e.target.type === "checkbox"
+              )
+                return;
               window.location.href = `/deck/${deck.id}`;
             }}
           >
-
             {/* CHECKBOX FOR BULK SELECT */}
             <input
               type="checkbox"
@@ -276,6 +338,12 @@ export default function MyDecks() {
                 Delete
               </button>
 
+              <button
+                onClick={() => exportDeck(deck)}
+                style={{ backgroundColor: "gray", color: "white" }}
+              >
+                Export
+              </button>
             </div>
           </li>
         ))}

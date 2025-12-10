@@ -8,6 +8,7 @@ import AddCard from "./pages/AddCard";
 import EditCard from "./pages/EditCard";
 import EditDeck from "./pages/EditDeck";
 import ReviewDeck from "./pages/ReviewDeck";
+import DeckStats from "./pages/DeckStats";
 
 
 
@@ -33,6 +34,7 @@ function App() {
         <Route path="/card/:id/edit" element={<EditCard />} />
         <Route path="/deck/:id/edit" element={<EditDeck />} />
         <Route path="/deck/:id/review" element={<ReviewDeck />} />
+        <Route path="/deck/:id/stats" element={<DeckStats />} />
 
       </Routes>
     </BrowserRouter>

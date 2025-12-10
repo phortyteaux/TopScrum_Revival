@@ -9,6 +9,7 @@ export default function AddCard() {
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const [starred, setStarred] = useState(false);
   const [message, setMessage] = useState("");
 
   // Upload image to Supabase Storage
@@ -47,6 +48,7 @@ export default function AddCard() {
       front_text: front,
       back_text: back,
       image_url,
+      starred: starred,
     });
 
     if (error) {
@@ -56,6 +58,7 @@ export default function AddCard() {
       setFront("");
       setBack("");
       setImageFile(null);
+      setStarred(false);
 
       // redirect to deck page
       setTimeout(() => navigate(`/deck/${deck_id}`), 600);
@@ -73,20 +76,38 @@ export default function AddCard() {
           value={front}
           onChange={(e) => setFront(e.target.value)}
           required
-        /><br /><br />
+        />
+        <br />
+        <br />
 
         <textarea
           placeholder="Back text"
           value={back}
           onChange={(e) => setBack(e.target.value)}
           required
-        /><br /><br />
+        />
+        <br />
+        <br />
 
         <input
           type="file"
           accept="image/*"
           onChange={(e) => setImageFile(e.target.files[0])}
-        /><br /><br />
+        />
+        <br />
+        <br />
+
+        <label>
+          <input
+            type="checkbox"
+            checked={starred}
+            onChange={(e) => setStarred(e.target.checked)}
+            style={{ marginRight: "6px" }}
+          />
+          Star / favorite this card
+        </label>
+        <br />
+        <br />
 
         <button type="submit">Add Card</button>
       </form>
