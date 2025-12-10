@@ -9,6 +9,7 @@ import EditCard from "./pages/EditCard";
 import EditDeck from "./pages/EditDeck";
 import ReviewDeck from "./pages/ReviewDeck";
 import DeckStats from "./pages/DeckStats";
+import Home from "./pages/Home";
 
 
 
@@ -24,7 +25,7 @@ function App() {
       </nav>
 
       <Routes>
-        <Route path="/" element={<h1>Home Page</h1>} />
+        <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/create-deck" element={<CreateDeck />} />
