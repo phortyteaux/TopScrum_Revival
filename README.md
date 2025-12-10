@@ -1,16 +1,136 @@
-# React + Vite
+Flashcard Learning App
+CPSC 362 – Software Engineering
+Team Members
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+John Alora
+Adan Jeronimo
+Max Kwatcher
+Sean Lowry
+Rami Semrin
+Sargun Singh
 
-Currently, two official plugins are available:
+1. Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The Flashcard Learning App is a web-based studying tool that allows users to create decks, add cards, review material using multiple modes, track performance analytics, and store learning progress in the cloud. The app focuses on simplicity, accessibility, and efficiency for students who want a customizable study experience.
 
-## React Compiler
+2. Key Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+– User authentication (signup/login)
+– Create, edit, delete decks
+– Add cards with text and optional images
+– Review mode with progress bar
+– Shuffle mode
+– Track card attempts, correctness, and accuracy
+– Review incorrect cards only
+– Starred (favorite) cards
+– Deck analytics dashboard (statistics + hardest cards)
+– Bulk deck actions: import, export (JSON), delete, ZIP export
+– Search for decks and search within a deck
+– Upload images via Supabase Storage
 
-## Expanding the ESLint configuration
+3. Architecture Diagram (High-Level)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Frontend → React.js (Vite)
+Backend → Supabase (Auth, Database, Storage)
+Database → PostgreSQL on Supabase
+Hosting → Vercel (optional; instructor-dependent)
+
+Main system components:
+– Authentication Service
+– Deck service (CRUD)
+– Card service (CRUD + analytics logging)
+– Review engine
+– Analytics engine
+– Storage bucket for images
+
+(A proper diagram can be added using draw.io or diagrams.net before submission.)
+
+4. Tech Stack
+
+Frontend: React.js, Vite, JavaScript
+Backend-as-a-Service: Supabase
+Database: PostgreSQL
+Storage: Supabase Storage
+UI Libraries: Custom CSS (Tailwind optional)
+Build Tools: Node.js, Vite
+Version Control: Git/GitHub
+
+5. Code Structure
+
+src/
+– pages/
+ • Login.jsx
+ • Signup.jsx
+ • MyDecks.jsx
+ • DeckDetails.jsx
+ • ReviewDeck.jsx
+ • EditDeck.jsx
+ • AddCard.jsx
+ • EditCard.jsx
+ • DeckStats.jsx
+– context/
+ • AuthContext.jsx
+– lib/
+ • supabaseClient.js
+App.jsx
+main.jsx
+
+6. Algorithms & Logic Highlights
+
+– Card shuffle uses randomized array shuffling
+– Review engine updates card correctness and attempts
+– Incorrect-only mode dynamically rebuilds the review list
+– Analytics computation aggregates attempts, effectiveness, and hardest cards
+– Bulk export uses JSZip + FileSaver
+– Image upload uses Supabase Storage signed URLs
+
+7. Test Plan (Summary)
+
+Testing includes:
+– Functional testing of CRUD operations
+– Authentication workflow
+– Image upload tests
+– Review mode logic correctness
+– Analytics accuracy
+– JSON import/export integrity
+– UI validation and error handling
+
+(Full test cases should be included in the final documentation per instructor guidelines.)
+
+8. Deployment Instructions
+
+Clone repository
+
+Install dependencies
+ npm install
+
+Create a .env or use Vite environment variables:
+ VITE_SUPABASE_URL=xxx
+ VITE_SUPABASE_ANON_KEY=xxx
+
+Start dev server
+ npm run dev
+
+Optional: Deploy to Vercel
+
+Deployment diagram should describe user → frontend → Supabase interactions as required by CPSC 362 guidelines.
+
+9. Future Improvements
+
+– UI/UX redesign with Tailwind / Material UI
+– Spaced repetition algorithm (e.g., SM-2)
+– Mobile version (React Native)
+– Collaborating on shared decks
+– AI-generated practice questions
+– Audio flashcards
+– Offline mode
+
+10. References
+
+– CPSC 362 Project Guidelines 
+
+CPSC 362 - Project final delver…
+
+
+– Supabase documentation
+– React and Vite documentation
