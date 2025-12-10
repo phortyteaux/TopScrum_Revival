@@ -15,55 +15,89 @@ export default function DeckDetails() {
     const [deck, setDeck] = useState(null);
     const [cards, setCards] = useState([]);
 
+    // NEW: search state for filtering cards
+    const [cardSearch, setCardSearch] = useState("");
+
+    // ---------------------------------------------------------
+    // EXPORT DECK AS JSON FILE
+    // ---------------------------------------------------------
+    async function exportDeck() {
+        // Fetch cards to ensure latest info
+        const { data: cardData } = await supabase
+            .from("cards")
+            .select("*")
+            .eq("deck_id", id);
+
+        const exportData = {
+            title: deck.title,
+            description: deck.description,
+            cards: cardData || []
+        };
+
+        const json = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${deck.title.replace(/\s+/g, "_")}_deck.json`;
+        a.click();
+
+        URL.revokeObjectURL(url);
+    }
+
     // ---------------------------------------------------------
     // LOAD DECK INFORMATION
-    // Runs every time the deck ID or user changes
     // ---------------------------------------------------------
     useEffect(() => {
 
-        // Fetch the deck info from Supabase
         async function fetchDeck() {
             const { data, error } = await supabase
                 .from("decks")
                 .select("*")
-                .eq("id", id)         // match the deck ID from the URL
-                .eq("user_id", user.id)  // ensure it belongs to the logged-in user
-                .single();            // returns exactly one result
+                .eq("id", id)
+                .eq("user_id", user.id)
+                .single();
 
             if (!error) setDeck(data);
         }
 
-        // Only fetch the deck AFTER we know who the user is
         if (user) fetchDeck();
 
-    }, [id, user]);  // dependencies → reload deck if ID or user changes
+    }, [id, user]);
 
 
 
     // ---------------------------------------------------------
     // LOAD CARDS FOR THIS DECK
-    // Runs every time the deck ID changes
     // ---------------------------------------------------------
     useEffect(() => {
 
-        // Fetch all cards that belong to this deck
         async function fetchCards() {
             const { data, error } = await supabase
                 .from("cards")
                 .select("*")
-                .eq("deck_id", id);   // match deck foreign key
+                .eq("deck_id", id);
 
             if (!error) setCards(data);
         }
 
         fetchCards();
 
-    }, [id]);  // only reload cards when deck ID changes
+    }, [id]);
 
 
-
-    // If data is still loading, show a simple loading screen
+    // If still loading deck info
     if (!deck) return <p>Loading deck...</p>;
+
+    // ---------------------------------------------------------
+    // FILTER CARDS BASED ON SEARCH INPUT
+    // ---------------------------------------------------------
+    const filteredCards = cards.filter((card) =>
+        (card.front_text + " " + card.back_text)
+            .toLowerCase()
+            .includes(cardSearch.toLowerCase())
+    );
 
 
     // ---------------------------------------------------------
@@ -73,6 +107,8 @@ export default function DeckDetails() {
         <div style={{ padding: "20px" }}>
             <h1>{deck.title}</h1>
             <p>{deck.description}</p>
+
+            {/* ACTION BUTTONS */}
             <div
                 style={{
                     display: "flex",
@@ -135,24 +171,53 @@ export default function DeckDetails() {
                         Review Deck
                     </button>
                 </a>
+
+                {/* NEW EXPORT BUTTON */}
+                <button
+                    style={{
+                        backgroundColor: "gray",
+                        color: "white",
+                        padding: "6px 12px",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                    }}
+                    onClick={exportDeck}
+                >
+                    Export Deck
+                </button>
             </div>
 
             <h2>Cards</h2>
 
-            {cards.length === 0 ? (
-                <p>No cards yet.</p>
+            {/* NEW SEARCH BAR */}
+            <input
+                type="text"
+                placeholder="Search cards..."
+                value={cardSearch}
+                onChange={(e) => setCardSearch(e.target.value)}
+                style={{
+                    padding: "8px",
+                    width: "80%",
+                    margin: "10px 0 20px 0",
+                    border: "1px solid gray",
+                    borderRadius: "6px",
+                }}
+            />
+
+            {/* CARD LIST */}
+            {filteredCards.length === 0 ? (
+                <p>No matching cards.</p>
             ) : (
                 <ul>
-                    {cards.map((card) => (
+                    {filteredCards.map((card) => (
 
                         <li key={card.id} style={{ marginBottom: "20px" }}>
-                            {/* Card Front and Back Text */}
                             <strong>{card.front_text}</strong>
                             <br />
                             {card.back_text}
                             <br />
 
-                            {/* Display card image if available */}
                             {card.image_url && (
                                 <img
                                     src={card.image_url}
@@ -178,9 +243,6 @@ export default function DeckDetails() {
                                     borderRadius: "4px",
                                     cursor: "pointer",
                                 }}
-
-                                // When clicked → delete card from Supabase,
-                                // then remove it from the UI immediately
                                 onClick={async () => {
                                     const { error } = await supabase
                                         .from("cards")
@@ -188,14 +250,14 @@ export default function DeckDetails() {
                                         .eq("id", card.id);
 
                                     if (!error) {
-                                        // Remove card locally so UI updates right away
                                         setCards(cards.filter((c) => c.id !== card.id));
                                     }
                                 }}
                             >
                                 Delete
                             </button>
-                            {/* Edit button */}
+
+                            {/* EDIT BUTTON */}
                             <a href={`/card/${card.id}/edit`}>
                                 <button
                                     style={{
@@ -218,7 +280,7 @@ export default function DeckDetails() {
                 </ul>
             )}
 
-            {/* Button to navigate to Add Card page */}
+            {/* Add Card Button */}
             <a href={`/deck/${id}/add-card`}>
                 <button>Add New Card</button>
             </a>
