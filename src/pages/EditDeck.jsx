@@ -20,9 +20,8 @@ export default function EditDeck() {
         .eq('id', deckId)
         .single();
 
-      if (error) {
-        setError(error.message);
-      } else if (data) {
+      if (error) setError(error.message);
+      else if (data) {
         setForm({
           title: data.title ?? '',
           description: data.description ?? '',
@@ -31,9 +30,7 @@ export default function EditDeck() {
       setLoading(false);
     }
 
-    if (deckId) {
-      loadDeck();
-    }
+    if (deckId) loadDeck();
   }, [deckId]);
 
   const handleChange = (e) => {
@@ -58,24 +55,21 @@ export default function EditDeck() {
 
     setSaving(false);
 
-    if (error) {
-      setError(error.message);
-    } else {
-      navigate('/decks');
-    }
+    if (error) setError(error.message);
+    else navigate('/decks');
   };
 
   if (loading) return <div className="p-4">Loading deck...</div>;
 
   return (
-    <div className="max-w-md mx-auto mt-8 p-4 border rounded">
+    <div className="max-w-md mx-auto mt-8 p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 shadow-sm">
       <h1 className="text-xl font-semibold mb-4">Edit Deck</h1>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className="block text-sm mb-1">Title</label>
           <input
             name="title"
-            className="w-full border px-2 py-1 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-transparent px-2 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand"
             value={form.title}
             onChange={handleChange}
             required
@@ -85,7 +79,7 @@ export default function EditDeck() {
           <label className="block text-sm mb-1">Description</label>
           <textarea
             name="description"
-            className="w-full border px-2 py-1 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-transparent px-2 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand"
             rows={3}
             value={form.description}
             onChange={handleChange}
@@ -95,7 +89,7 @@ export default function EditDeck() {
         <button
           type="submit"
           disabled={saving}
-          className="w-full mt-2 px-3 py-2 border rounded"
+          className="w-full mt-2 px-3 py-2 rounded-md bg-brand text-white text-sm font-medium hover:bg-indigo-600 transition disabled:opacity-60"
         >
           {saving ? 'Saving...' : 'Save Changes'}
         </button>

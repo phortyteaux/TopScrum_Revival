@@ -36,15 +36,15 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-4 border rounded">
-      <h1 className="text-xl font-semibold mb-4">Login</h1>
+    <div className="max-w-md mx-auto mt-10 p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 shadow-sm">
+      <h1 className="text-2xl font-semibold mb-4 text-center">Login</h1>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className="block text-sm mb-1">Email</label>
           <input
             type="email"
             name="email"
-            className="w-full border px-2 py-1 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-transparent px-2 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand"
             value={form.email}
             onChange={handleChange}
             required
@@ -55,24 +55,22 @@ export default function Login() {
           <input
             type="password"
             name="password"
-            className="w-full border px-2 py-1 rounded"
+            className="w-full border border-gray-300 dark:border-gray-700 bg-transparent px-2 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand"
             value={form.password}
             onChange={handleChange}
             required
           />
         </div>
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full mt-2 px-3 py-2 border rounded font-medium"
+          className="w-full mt-2 px-3 py-2 rounded-md bg-brand text-white text-sm font-medium hover:bg-indigo-600 transition disabled:opacity-60"
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
-      <p className="mt-3 text-sm">
+      <p className="mt-3 text-sm text-center">
         Don&apos;t have an account?{' '}
         <Link to="/signup" className="underline">
           Sign up

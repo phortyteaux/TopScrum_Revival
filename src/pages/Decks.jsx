@@ -18,36 +18,32 @@ export default function Decks() {
       const { data, error } = await supabase
         .from('decks')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        setError(error.message);
-      } else {
-        setDecks(data ?? []);
-      }
+      if (error) setError(error.message);
+      else setDecks(data ?? []);
 
       setLoading(false);
     }
 
-    if (user) {
-      fetchDecks();
-    }
+    if (user) fetchDecks();
   }, [user]);
 
   return (
-    <div className="max-w-3xl mx-auto mt-6 px-4">
+    <div className="mt-4">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Your Decks</h1>
         <Link
           to="/decks/new"
-          className="px-3 py-1 border rounded text-sm"
+          className="px-3 py-1 rounded-md border border-brand text-sm text-brand hover:bg-brand hover:text-white transition"
         >
           + New Deck
         </Link>
       </div>
 
       {loading && <p>Loading decks...</p>}
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       {!loading && decks.length === 0 && (
         <p className="text-sm text-gray-600">
@@ -59,32 +55,32 @@ export default function Decks() {
         {decks.map((deck) => (
           <div
             key={deck.id}
-            className="border rounded px-3 py-2 flex items-center justify-between"
+            className="border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 flex items-center justify-between bg-white/80 dark:bg-gray-900/80"
           >
             <div>
               <h2 className="font-medium">{deck.title}</h2>
               {deck.description && (
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-600 dark:text-gray-400">
                   {deck.description}
                 </p>
               )}
             </div>
-            <div className="flex gap-2 text-sm">
+            <div className="flex gap-3 text-xs sm:text-sm">
               <Link
                 to={`/decks/${deck.id}`}
-                className="underline"
+                className="underline hover:text-brand"
               >
                 Open
               </Link>
               <Link
                 to={`/decks/${deck.id}/edit`}
-                className="underline"
+                className="underline hover:text-brand"
               >
                 Edit
               </Link>
               <Link
                 to={`/review/${deck.id}`}
-                className="underline"
+                className="underline hover:text-brand"
               >
                 Review
               </Link>

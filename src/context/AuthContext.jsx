@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
 
-    // Listen for auth changes
+    // Listen for changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -39,8 +39,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }

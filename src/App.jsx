@@ -14,23 +14,25 @@ import Review from './pages/Review';
 
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <Navbar />
-      <main className="flex-1">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+      <main className="py-6">
+        <div className="app-container">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
-          {/* Protected routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Decks />} />
-            <Route path="/decks" element={<Decks />} />
-            <Route path="/decks/new" element={<NewDeck />} />
-            <Route path="/decks/:deckId" element={<DeckDetail />} />
-            <Route path="/decks/:deckId/edit" element={<EditDeck />} />
-            <Route path="/review/:deckId" element={<Review />} />
-          </Route>
-        </Routes>
+            {/* Protected routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<Decks />} />
+              <Route path="/decks" element={<Decks />} />
+              <Route path="/decks/new" element={<NewDeck />} />
+              <Route path="/decks/:deckId" element={<DeckDetail />} />
+              <Route path="/decks/:deckId/edit" element={<EditDeck />} />
+              <Route path="/review/:deckId" element={<Review />} />
+            </Route>
+          </Routes>
+        </div>
       </main>
     </div>
   );

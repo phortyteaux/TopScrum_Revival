@@ -31,9 +31,7 @@ export default function DeckDetail() {
       setLoading(false);
     }
 
-    if (deckId) {
-      loadData();
-    }
+    if (deckId) loadData();
   }, [deckId]);
 
   const handleCardChange = (e) => {
@@ -60,9 +58,8 @@ export default function DeckDetail() {
 
     setSavingCard(false);
 
-    if (error) {
-      setError(error.message);
-    } else if (data) {
+    if (error) setError(error.message);
+    else if (data) {
       setCards((prev) => [...prev, data]);
       setCardForm({ front: '', back: '' });
     }
@@ -70,24 +67,20 @@ export default function DeckDetail() {
 
   const handleDeleteCard = async (cardId) => {
     const { error } = await supabase.from('cards').delete().eq('id', cardId);
-    if (error) {
-      setError(error.message);
-    } else {
-      setCards((prev) => prev.filter((c) => c.id !== cardId));
-    }
+    if (error) setError(error.message);
+    else setCards((prev) => prev.filter((c) => c.id !== cardId));
   };
 
   if (loading) return <div className="p-4">Loading deck...</div>;
-
-  if (!deck) {
-    return <div className="p-4">Deck not found.</div>;
-  }
+  if (!deck) return <div className="p-4">Deck not found.</div>;
 
   return (
-    <div className="max-w-3xl mx-auto mt-6 px-4">
+    <div className="mt-4">
       <h1 className="text-2xl font-semibold mb-1">{deck.title}</h1>
       {deck.description && (
-        <p className="text-sm text-gray-600 mb-4">{deck.description}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {deck.description}
+        </p>
       )}
 
       {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
@@ -101,15 +94,17 @@ export default function DeckDetail() {
           {cards.map((card) => (
             <li
               key={card.id}
-              className="border rounded px-3 py-2 flex justify-between items-start text-sm"
+              className="border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 flex justify-between items-start text-sm bg-white/80 dark:bg-gray-900/80"
             >
               <div>
                 <p className="font-medium">Q: {card.front}</p>
-                <p className="text-gray-700">A: {card.back}</p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  A: {card.back}
+                </p>
               </div>
               <button
                 onClick={() => handleDeleteCard(card.id)}
-                className="text-xs text-red-600"
+                className="text-xs text-red-600 hover:underline"
               >
                 Delete
               </button>
@@ -117,13 +112,16 @@ export default function DeckDetail() {
           ))}
         </ul>
 
-        <form onSubmit={handleAddCard} className="space-y-2 border rounded p-3">
-          <h3 className="font-medium text-sm">Add Card</h3>
+        <form
+          onSubmit={handleAddCard}
+          className="space-y-2 border border-gray-200 dark:border-gray-800 rounded-lg p-3 bg-white/80 dark:bg-gray-900/80"
+        >
+          <h3 className="font-medium text-sm mb-1">Add Card</h3>
           <div>
             <label className="block text-xs mb-1">Front</label>
             <input
               name="front"
-              className="w-full border px-2 py-1 rounded text-sm"
+              className="w-full border border-gray-300 dark:border-gray-700 bg-transparent px-2 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand"
               value={cardForm.front}
               onChange={handleCardChange}
               required
@@ -133,7 +131,7 @@ export default function DeckDetail() {
             <label className="block text-xs mb-1">Back</label>
             <input
               name="back"
-              className="w-full border px-2 py-1 rounded text-sm"
+              className="w-full border border-gray-300 dark:border-gray-700 bg-transparent px-2 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand"
               value={cardForm.back}
               onChange={handleCardChange}
               required
@@ -142,7 +140,7 @@ export default function DeckDetail() {
           <button
             type="submit"
             disabled={savingCard}
-            className="mt-1 px-3 py-1 border rounded text-sm"
+            className="mt-1 px-3 py-2 rounded-md bg-brand text-white text-xs sm:text-sm font-medium hover:bg-indigo-600 transition disabled:opacity-60"
           >
             {savingCard ? 'Adding...' : 'Add Card'}
           </button>
