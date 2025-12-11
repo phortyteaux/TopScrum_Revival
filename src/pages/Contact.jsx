@@ -6,7 +6,7 @@ export default function Contact () {
         Max Kwatcher
       </a>
       <br></br>
-      <a href="mailto:ajeronimo@csu.fullerton.edu">
+      <a href="mailto:ajjeroni@csu.fullerton.edu">
         Adan Jeronimo
       </a>
       <br></br>
