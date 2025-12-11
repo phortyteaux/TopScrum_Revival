@@ -1,4 +1,6 @@
+// src/pages/MyDecks.jsx
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import JSZip from "jszip";
@@ -6,6 +8,8 @@ import { saveAs } from "file-saver";
 
 export default function MyDecks() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [decks, setDecks] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedDecks, setSelectedDecks] = useState([]);
@@ -230,13 +234,12 @@ export default function MyDecks() {
 
       {/* Bulk actions */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
-        <a href="/decks/new">
-          <button
-            className="rounded-full border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500"
-          >
-            Create deck
-          </button>
-        </a>
+        <button
+          onClick={() => navigate("/decks/new")}
+          className="rounded-full border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500"
+        >
+          Create deck
+        </button>
         <button
           onClick={selectAll}
           className="rounded-full border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500"
@@ -296,7 +299,7 @@ export default function MyDecks() {
                   e.target.type === "checkbox"
                 )
                   return;
-                window.location.href = `/deck/${deck.id}`;
+                navigate(`/deck/${deck.id}`);
               }}
             >
               <div className="flex items-start gap-2">
@@ -318,9 +321,7 @@ export default function MyDecks() {
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
-                  onClick={() =>
-                    (window.location.href = `/deck/${deck.id}/review`)
-                  }
+                  onClick={() => navigate(`/deck/${deck.id}/review`)}
                   className="inline-flex flex-1 items-center justify-center rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-emerald-400"
                 >
                   Review
