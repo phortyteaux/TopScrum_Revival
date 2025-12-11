@@ -22,7 +22,7 @@ export default function Home() {
               </span>
             </h1>
 
-            <p className="max-w-xl text-sm text-slate-300 sm:text-base">
+            <p className="max-w-xl text-sm text-slate-600 dark:text-slate-300 sm:text-base">
               Your study companion — fast, clean, powerful. Create decks, review smarter,
               and track your progress in seconds.
             </p>
