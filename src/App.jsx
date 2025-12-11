@@ -1,48 +1,85 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import Signup from "./pages/Signup";
-import Login from "./pages/Login";
-import CreateDeck from "./pages/CreateDeck";
-import MyDecks from "./pages/MyDecks";
-import DeckDetails from "./pages/DeckDetails";
-import AddCard from "./pages/AddCard";
-import EditCard from "./pages/EditCard";
-import EditDeck from "./pages/EditDeck";
-import ReviewDeck from "./pages/ReviewDeck";
-import DeckStats from "./pages/DeckStats";
-import Home from "./pages/Home";
-import Demo from "./pages/Demo"
-import Contact from "./pages/Contact"
+// src/App.jsx
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
+import Navbar from './components/navbar';
+import Home from './pages/Home';
 
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Decks from './pages/MyDecks';
+import NewDeck from './pages/CreateDeck';
+import DeckDetail from './pages/DeckDetails';
+import EditDeck from './pages/EditDeck';
+import ReviewPage from './pages/ReviewDeck'; // if/when you make one
+
+import { useAuth } from './context/AuthContext';
 
 function App() {
+  const { user } = useAuth();
+
   return (
-    <BrowserRouter>
-      <nav style={{ padding: 20 }}>
-        <Link to="/" style={{ marginRight: 10 }}>Home</Link>
-        <Link to="/signup" style={{ marginRight: 10 }}>Signup</Link>
-        <Link to="/login" style={{ marginRight: 10 }}>Login</Link>
-        <Link to="/create-deck" style={{ marginRight: 10 }}>Create Deck</Link>
-        <Link to="/my-decks">My Decks</Link>
-      </nav>
+    <>
+      <Navbar />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/demo" element={<Demo />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/create-deck" element={<CreateDeck />} />
-        <Route path="/my-decks" element={<MyDecks />} />
-        <Route path="/deck/:id" element={<DeckDetails />} />
-        <Route path="/deck/:id/add-card" element={<AddCard />} />
-        <Route path="/card/:id/edit" element={<EditCard />} />
-        <Route path="/deck/:id/edit" element={<EditDeck />} />
-        <Route path="/deck/:id/review" element={<ReviewDeck />} />
-        <Route path="/deck/:id/stats" element={<DeckStats />} />
+      <main className="app-container py-4">
+        <Routes>
+          {/* Default route: send logged-in users to /decks, otherwise to /login */}
+          <Route path="/" element={<Home />} />
 
-      </Routes>
-    </BrowserRouter>
+          {/* Auth routes – only show if NOT logged in */}
+          <Route
+            path="/login"
+            element={
+              user ? <Navigate to="/decks" replace /> : <Login />
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              user ? <Navigate to="/decks" replace /> : <Signup />
+            }
+          />
+
+          {/* Protected routes – only for logged-in users */}
+          <Route
+            path="/decks"
+            element={
+              user ? <Decks /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/decks/new"
+            element={
+              user ? <NewDeck /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/decks/:deckId"
+            element={
+              user ? <DeckDetail /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/decks/:deckId/edit"
+            element={
+              user ? <EditDeck /> : <Navigate to="/login" replace />
+            }
+          />
+
+          {/* Example review route if you build it */}
+          {/* <Route
+            path="/review/:deckId"
+            element={
+              user ? <ReviewPage /> : <Navigate to="/login" replace />
+            }
+          /> */}
+
+          {/* Catch-all: go home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </>
   );
 }
 
