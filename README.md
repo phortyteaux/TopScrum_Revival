@@ -112,22 +112,22 @@ src/
 
 ## 🧪 How to Run Locally
 
-### 1. Install dependencies
-```
-npm install
-```
-
-### 2. Start development server
-```
-npm run dev
-```
-
-### 3. Set up environment variables  
+### 1. Set up environment variables  
 Create a `.env` file in the project root:
 
 ```
 VITE_SUPABASE_URL=your_url_here
 VITE_SUPABASE_ANON_KEY=your_key_here
+```
+
+### 2. Install dependencies
+```
+npm install
+```
+
+### 3. Start development server
+```
+npm run dev
 ```
 
 ---
@@ -155,17 +155,6 @@ attempts (int, default 0)
 correct (int, default 0)
 incorrect (int, default 0)
 ```
-
----
-
-## 🧑‍🤝‍🧑 Project Responsibilities (Suggested)
-- Frontend (React UI Components)
-- Supabase Integration
-- Data Modeling & Queries
-- Review Mode Logic
-- Stats Dashboard
-- Import/Export System
-- Documentation & Testing
 
 ---
 
