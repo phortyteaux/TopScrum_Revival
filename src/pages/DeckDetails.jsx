@@ -151,7 +151,7 @@ export default function DeckDetails() {
         <div className="flex flex-wrap gap-2 text-xs">
           <Link
             to={`/deck/${id}/review`}
-            className="inline-flex items-center rounded-xl bg-gradient-to-r from-brand-500 to-emerald-400 px-3 py-1.5 font-semibold text-slate-950 hover:from-brand-400 hover:to-emerald-300"
+            className="inline-flex items-center rounded-xl bg-emerald-400 px-3 py-1.5 font-semibold text-slate-900 hover:bg-emerald-300"
           >
             Review deck
           </Link>

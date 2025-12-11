@@ -1,7 +1,7 @@
 // src/pages/Home.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { footerSections } from './footerData';
+import React from "react";
+import { Link } from "react-router-dom";
+import { footerSections } from "./footerData";
 
 export default function Home() {
   return (
@@ -18,15 +18,13 @@ export default function Home() {
               </p>
 
               <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                Welcome to{' '}
-                <span className="bg-gradient-to-r from-brand-400 via-emerald-300 to-sky-300 bg-clip-text text-transparent">
-                  TopScrum Flashcards
-                </span>
+                Welcome to{" "}
+                <span className="text-emerald-300">TopScrum Flashcards</span>
               </h1>
 
               <p className="max-w-xl text-sm text-slate-300 sm:text-base">
-                Your study companion — fast, clean, powerful. Create decks, review smarter,
-                and track your progress in seconds.
+                Your study companion — fast, clean, powerful. Create decks,
+                review smarter, and track your progress in seconds.
               </p>
 
               {/* CTA buttons */}
@@ -62,23 +60,35 @@ export default function Home() {
                 <div className="space-y-3 text-left text-xs text-slate-300">
                   <div className="flex items-center justify-between rounded-lg bg-slate-950/40 px-3 py-2">
                     <div>
-                      <p className="font-medium text-slate-100">Big-O Notation</p>
-                      <p className="text-[11px] text-slate-400">DSA · 8 cards</p>
+                      <p className="font-medium text-slate-100">
+                        Big-O Notation
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        DSA · 8 cards
+                      </p>
                     </div>
-                    <span className="text-[11px] text-emerald-300">On track</span>
+                    <span className="text-[11px] text-emerald-300">
+                      On track
+                    </span>
                   </div>
 
                   <div className="flex items-center justify-between rounded-lg bg-slate-950/40 px-3 py-2">
                     <div>
                       <p className="font-medium text-slate-100">SQL Joins</p>
-                      <p className="text-[11px] text-slate-400">Databases · 10 cards</p>
+                      <p className="text-[11px] text-slate-400">
+                        Databases · 10 cards
+                      </p>
                     </div>
-                    <span className="text-[11px] text-yellow-300">Due soon</span>
+                    <span className="text-[11px] text-yellow-300">
+                      Due soon
+                    </span>
                   </div>
 
                   <div className="flex items-center justify-between rounded-lg bg-slate-950/40 px-3 py-2">
                     <div>
-                      <p className="font-medium text-slate-100">Agile vs Waterfall</p>
+                      <p className="font-medium text-slate-100">
+                        Agile vs Waterfall
+                      </p>
                       <p className="text-[11px] text-slate-400">SE · 6 cards</p>
                     </div>
                     <span className="text-[11px] text-slate-400">New deck</span>
@@ -86,7 +96,8 @@ export default function Home() {
                 </div>
 
                 <p className="mt-4 text-[11px] text-slate-500">
-                  Build decks for every class. Review in focused sprints. Ship better grades.
+                  Build decks for every class. Review in focused sprints. Ship
+                  better grades.
                 </p>
               </div>
             </section>
@@ -113,7 +124,7 @@ const Footer = () => {
               <ul className="space-y-1 text-xs text-slate-400">
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    {link.path.startsWith('http') ? (
+                    {link.path.startsWith("http") ? (
                       <a
                         href={link.path}
                         target="_blank"
