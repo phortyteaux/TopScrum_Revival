@@ -230,6 +230,13 @@ export default function MyDecks() {
 
       {/* Bulk actions */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
+        <a href="/decks/new">
+          <button
+            className="rounded-full border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500"
+          >
+            Create deck
+          </button>
+        </a>
         <button
           onClick={selectAll}
           className="rounded-full border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500"
