@@ -1,32 +1,18 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { supabase } from "../lib/supabaseClient";
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
 
-// ====== MOVE THIS UP HERE SO IT'S AVAILABLE ======
-const cell = {
-  border: "1px solid #ddd",
-  padding: "8px 10px",
-};
-
-// ===== SMALL REUSABLE COMPONENT =====
 function StatBox({ label, value }) {
   return (
-    <div
-      style={{
-        background: "#f3f3f3",
-        padding: "20px",
-        borderRadius: "8px",
-        textAlign: "center",
-        border: "1px solid #ddd",
-      }}
-    >
-      <div style={{ fontSize: "22px", fontWeight: "bold" }}>{value}</div>
-      <div style={{ fontSize: "14px", marginTop: "5px", color: "#555" }}>
-        {label}
-      </div>
+    <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-center shadow-sm shadow-slate-950/40">
+      <div className="text-xl font-semibold text-slate-50">{value}</div>
+      <div className="mt-1 text-xs text-slate-400">{label}</div>
     </div>
   );
 }
+
+const cell =
+  'border border-slate-800 px-3 py-2 text-xs text-left align-top text-slate-100';
 
 export default function DeckStats() {
   const { id } = useParams();
@@ -35,21 +21,20 @@ export default function DeckStats() {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ===== LOAD DATA =====
   useEffect(() => {
     async function loadStats() {
       setLoading(true);
 
       const { data: deckData } = await supabase
-        .from("decks")
-        .select("*")
-        .eq("id", id)
+        .from('decks')
+        .select('*')
+        .eq('id', id)
         .single();
 
       const { data: cardData } = await supabase
-        .from("cards")
-        .select("*")
-        .eq("deck_id", id);
+        .from('cards')
+        .select('*')
+        .eq('deck_id', id);
 
       setDeck(deckData || null);
       setCards(cardData || []);
@@ -59,21 +44,25 @@ export default function DeckStats() {
     loadStats();
   }, [id]);
 
-  if (loading) return <p style={{ padding: 20 }}>Loading stats...</p>;
-  if (!deck) return <p style={{ padding: 20 }}>Deck not found.</p>;
+  if (loading) {
+    return <p className="text-sm text-slate-400">Loading stats...</p>;
+  }
+  if (!deck) {
+    return <p className="text-sm text-slate-400">Deck not found.</p>;
+  }
 
-  // ===== CALCULATIONS =====
   const totalCards = cards.length;
   const starredCount = cards.filter((c) => c.starred === true).length;
-
   const totalAttempts = cards.reduce((sum, c) => sum + (c.attempts || 0), 0);
   const totalCorrect = cards.reduce((sum, c) => sum + (c.correct || 0), 0);
-  const totalIncorrect = cards.reduce((sum, c) => sum + (c.incorrect || 0), 0);
+  const totalIncorrect = cards.reduce(
+    (sum, c) => sum + (c.incorrect || 0),
+    0,
+  );
 
   const accuracy =
     totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
 
-  // Hardest cards (lowest accuracy)
   const hardestCards = [...cards]
     .map((c) => {
       const attempts = c.attempts || 0;
@@ -86,78 +75,66 @@ export default function DeckStats() {
     .slice(0, 5);
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>{deck.title} — Stats</h1>
-      <p>{deck.description}</p>
-
-      {/* SUMMARY GRID */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: "15px",
-          marginTop: 20,
-          marginBottom: 30,
-        }}
-      >
-        <StatBox label="Total Cards" value={totalCards} />
-        <StatBox label="Starred Cards" value={starredCount} />
-        <StatBox label="Total Attempts" value={totalAttempts} />
-        <StatBox label="Correct Answers" value={totalCorrect} />
-        <StatBox label="Incorrect Answers" value={totalIncorrect} />
-        <StatBox label="Accuracy" value={`${accuracy}%`} />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-slate-50">
+          {deck.title} – stats
+        </h1>
+        <p className="mt-1 text-sm text-slate-400">
+          {deck.description || 'No description'}
+        </p>
       </div>
 
-      {/* HARDEST CARDS */}
-      <h2>Hardest Cards</h2>
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+        <StatBox label="Total cards" value={totalCards} />
+        <StatBox label="Starred cards" value={starredCount} />
+        <StatBox label="Total attempts" value={totalAttempts} />
+        <StatBox label="Correct answers" value={totalCorrect} />
+        <StatBox label="Incorrect answers" value={totalIncorrect} />
+        <StatBox label="Overall accuracy" value={`${accuracy}%`} />
+      </div>
 
-      {hardestCards.length === 0 ? (
-        <p>No difficult cards yet!</p>
-      ) : (
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: 10,
-          }}
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold text-slate-50">Hardest cards</h2>
+        {hardestCards.length === 0 ? (
+          <p className="text-sm text-slate-400">
+            No difficult cards yet. Keep reviewing!
+          </p>
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+            <table className="w-full border-collapse text-sm">
+              <thead className="bg-slate-950/60 text-xs text-slate-300">
+                <tr>
+                  <th className={cell}>Front</th>
+                  <th className={cell}>Back</th>
+                  <th className={cell}>Attempts</th>
+                  <th className={cell}>Accuracy</th>
+                </tr>
+              </thead>
+              <tbody>
+                {hardestCards.map((card) => (
+                  <tr key={card.id} className="odd:bg-slate-900/80">
+                    <td className={cell}>{card.front_text}</td>
+                    <td className={cell}>{card.back_text}</td>
+                    <td className={cell}>{card.attempts}</td>
+                    <td className={cell}>
+                      {Math.round(card.accuracy * 100)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div>
+        <Link
+          to={`/deck/${id}`}
+          className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-medium text-slate-100 hover:border-slate-500"
         >
-          <thead>
-            <tr style={{ background: "#eee" }}>
-              <th style={cell}>Front</th>
-              <th style={cell}>Back</th>
-              <th style={cell}>Attempts</th>
-              <th style={cell}>Accuracy</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {hardestCards.map((card) => (
-              <tr key={card.id}>
-                <td style={cell}>{card.front_text}</td>
-                <td style={cell}>{card.back_text}</td>
-                <td style={cell}>{card.attempts}</td>
-                <td style={cell}>{Math.round(card.accuracy * 100)}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      <div style={{ marginTop: 30 }}>
-        <a href={`/deck/${id}`}>
-          <button
-            style={{
-              padding: "10px 18px",
-              backgroundColor: "gray",
-              color: "white",
-              border: "none",
-              borderRadius: 6,
-              cursor: "pointer",
-            }}
-          >
-            Back to Deck
-          </button>
-        </a>
+          Back to deck
+        </Link>
       </div>
     </div>
   );

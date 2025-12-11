@@ -1,85 +1,64 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { supabase } from "../lib/supabaseClient";
-import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 export default function DeckDetails() {
-  // Get the deck ID from the URL (ex: /deck/123 → id = "123")
   const { id } = useParams();
-
-  // Get the currently logged-in user
   const { user } = useAuth();
 
-  // Store deck information and cards in component state
   const [deck, setDeck] = useState(null);
   const [cards, setCards] = useState([]);
-
-  // Search state for filtering cards
-  const [cardSearch, setCardSearch] = useState("");
-
-  // Show only starred cards toggle
+  const [cardSearch, setCardSearch] = useState('');
   const [showStarredOnly, setShowStarredOnly] = useState(false);
-
-  // Drag state for cards
   const [draggedCardId, setDraggedCardId] = useState(null);
 
-  // ---------------------------------------------------------
-  // EXPORT DECK AS JSON FILE
-  // ---------------------------------------------------------
   async function exportDeck() {
-    // Fetch cards to ensure latest info
     const { data: cardData } = await supabase
-      .from("cards")
-      .select("*")
-      .eq("deck_id", id)
-      .order("order_index", { ascending: true, nullsFirst: false });
+      .from('cards')
+      .select('*')
+      .eq('deck_id', id)
+      .order('order_index', { ascending: true, nullsFirst: false });
 
     const exportData = {
       title: deck.title,
       description: deck.description,
-      cards: cardData || []
+      cards: cardData || [],
     };
 
     const json = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
+    const blob = new Blob([json, { type: 'application/json' }]);
+
     const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
-    a.download = `${deck.title.replace(/\s+/g, "_")}_deck.json`;
+    a.download = `${deck.title.replace(/\s+/g, '_')}_deck.json`;
     a.click();
-
     URL.revokeObjectURL(url);
   }
 
-  // ---------------------------------------------------------
-  // TOGGLE STAR / FAVORITE FOR A CARD
-  // ---------------------------------------------------------
   async function toggleStar(cardId, currentStarred) {
     const { error } = await supabase
-      .from("cards")
+      .from('cards')
       .update({ starred: !currentStarred })
-      .eq("id", cardId);
+      .eq('id', cardId);
 
     if (!error) {
       setCards((prev) =>
         prev.map((c) =>
-          c.id === cardId ? { ...c, starred: !currentStarred } : c
-        )
+          c.id === cardId ? { ...c, starred: !currentStarred } : c,
+        ),
       );
     }
   }
 
-  // ---------------------------------------------------------
-  // LOAD DECK INFORMATION
-  // ---------------------------------------------------------
   useEffect(() => {
     async function fetchDeck() {
       const { data, error } = await supabase
-        .from("decks")
-        .select("*")
-        .eq("id", id)
-        .eq("user_id", user.id)
+        .from('decks')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', user.id)
         .single();
 
       if (!error) setDeck(data);
@@ -88,16 +67,13 @@ export default function DeckDetails() {
     if (user) fetchDeck();
   }, [id, user]);
 
-  // ---------------------------------------------------------
-  // LOAD CARDS FOR THIS DECK
-  // ---------------------------------------------------------
   useEffect(() => {
     async function fetchCards() {
       const { data, error } = await supabase
-        .from("cards")
-        .select("*")
-        .eq("deck_id", id)
-        .order("order_index", { ascending: true, nullsFirst: false });
+        .from('cards')
+        .select('*')
+        .eq('deck_id', id)
+        .order('order_index', { ascending: true, nullsFirst: false });
 
       if (!error) setCards(data || []);
     }
@@ -105,25 +81,20 @@ export default function DeckDetails() {
     fetchCards();
   }, [id]);
 
-  // If still loading deck info
-  if (!deck) return <p>Loading deck...</p>;
+  if (!deck) {
+    return <p className="text-sm text-slate-400">Loading deck...</p>;
+  }
 
-  // ---------------------------------------------------------
-  // FILTER CARDS BASED ON SEARCH INPUT + STAR FILTER
-  // ---------------------------------------------------------
   const filteredCards = cards
     .filter((card) =>
-      (card.front_text + " " + card.back_text)
+      (card.front_text + ' ' + card.back_text)
         .toLowerCase()
-        .includes(cardSearch.toLowerCase())
+        .includes(cardSearch.toLowerCase()),
     )
     .filter((card) => (showStarredOnly ? card.starred : true));
 
-  // ---------------------------------------------------------
-  // DRAG-AND-DROP HELPERS FOR CARDS
-  // ---------------------------------------------------------
-  function handleCardDragStart(id) {
-    setDraggedCardId(id);
+  function handleCardDragStart(cardId) {
+    setDraggedCardId(cardId);
   }
 
   function handleCardDragOver(e, overId) {
@@ -146,165 +117,106 @@ export default function DeckDetails() {
     if (!draggedCardId) return;
     setDraggedCardId(null);
 
-    // Persist order_index based on current order in `cards`
     const updates = cards.map((card, idx) => ({
       id: card.id,
-      order_index: idx
+      order_index: idx,
     }));
 
     const { error } = await supabase
-      .from("cards")
-      .upsert(updates, { onConflict: "id" });
+      .from('cards')
+      .upsert(updates, { onConflict: 'id' });
 
     if (error) {
-      console.error("Error saving card order:", error);
+      console.error('Error saving card order:', error);
     }
   }
 
-  // ---------------------------------------------------------
-  // MAIN PAGE RENDER — SHOW DECK + ALL CARDS
-  // ---------------------------------------------------------
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>{deck.title}</h1>
-      <p>{deck.description}</p>
+    <div className="space-y-6">
+      {/* Header / actions */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-50">
+            {deck.title}
+          </h1>
+          <p className="mt-1 text-sm text-slate-400">
+            {deck.description || 'No description'}
+          </p>
+        </div>
 
-      {/* ACTION BUTTONS */}
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          marginTop: "10px",
-          marginBottom: "20px"
-        }}
-      >
-        {/* REVIEW DECK */}
-        <a href={`/deck/${id}/review`}>
-          <button
-            style={{
-              backgroundColor: "purple",
-              color: "white",
-              padding: "6px 12px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer"
-            }}
+        <div className="flex flex-wrap gap-2 text-xs">
+          <Link
+            to={`/deck/${id}/review`}
+            className="inline-flex items-center rounded-xl bg-gradient-to-r from-brand-500 to-emerald-400 px-3 py-1.5 font-semibold text-slate-950 hover:from-brand-400 hover:to-emerald-300"
           >
-            Review Deck
-          </button>
-        </a>
-
-        {/* VIEW STATS */}
-        <a href={`/deck/${id}/stats`}>
-          <button
-            style={{
-              backgroundColor: "teal",
-              color: "white",
-              padding: "6px 12px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer"
-            }}
+            Review deck
+          </Link>
+          <Link
+            to={`/deck/${id}/stats`}
+            className="inline-flex items-center rounded-xl bg-teal-500/90 px-3 py-1.5 font-semibold text-slate-950 hover:bg-teal-400"
           >
-            View Stats
-          </button>
-        </a>
-
-        {/* EXPORT DECK */}
-        <button
-          style={{
-            backgroundColor: "gray",
-            color: "white",
-            padding: "6px 12px",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer"
-          }}
-          onClick={exportDeck}
-        >
-          Export Deck
-        </button>
-
-        {/* EDIT DECK */}
-        <a href={`/deck/${id}/edit`}>
+            View stats
+          </Link>
           <button
-            style={{
-              backgroundColor: "orange",
-              color: "white",
-              padding: "6px 12px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer"
-            }}
+            onClick={exportDeck}
+            className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-1.5 font-medium text-slate-100 hover:border-slate-500"
           >
-            Edit Deck
+            Export
           </button>
-        </a>
+          <Link
+            to={`/deck/${id}/edit`}
+            className="inline-flex items-center rounded-xl bg-amber-500/90 px-3 py-1.5 font-semibold text-slate-950 hover:bg-amber-400"
+          >
+            Edit deck
+          </Link>
+          <button
+            onClick={async () => {
+              const confirmDelete = confirm(
+                'Delete this deck? This cannot be undone.',
+              );
+              if (!confirmDelete) return;
 
-        {/* DELETE DECK */}
-        <button
-          style={{
-            backgroundColor: "red",
-            color: "white",
-            padding: "6px 12px",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer"
-          }}
-          onClick={async () => {
-            const confirmDelete = confirm(
-              "Are you sure you want to delete this deck? This cannot be undone."
-            );
-            if (!confirmDelete) return;
+              const { error } = await supabase
+                .from('decks')
+                .delete()
+                .eq('id', id);
 
-            const { error } = await supabase
-              .from("decks")
-              .delete()
-              .eq("id", id);
-
-            if (!error) {
-              window.location.href = "/my-decks";
-            }
-          }}
-        >
-          Delete Deck
-        </button>
+              if (!error) {
+                window.location.href = '/my-decks';
+              }
+            }}
+            className="inline-flex items-center rounded-xl bg-red-500/90 px-3 py-1.5 font-semibold text-white hover:bg-red-400"
+          >
+            Delete
+          </button>
+        </div>
       </div>
 
-      <h2>Cards</h2>
-
-      {/* SEARCH BAR + STAR FILTER */}
-      <div style={{ marginBottom: "15px" }}>
+      {/* Search / filter */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <input
           type="text"
           placeholder="Search cards..."
           value={cardSearch}
           onChange={(e) => setCardSearch(e.target.value)}
-          style={{
-            padding: "8px",
-            width: "80%",
-            border: "1px solid gray",
-            borderRadius: "6px",
-            marginRight: "10px"
-          }}
+          className="w-full max-w-md rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-50 outline-none ring-brand-500/0 transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/40"
         />
-
-        <label style={{ fontSize: "14px" }}>
+        <label className="flex items-center gap-2 text-xs text-slate-300">
           <input
             type="checkbox"
             checked={showStarredOnly}
             onChange={(e) => setShowStarredOnly(e.target.checked)}
-            style={{ marginRight: "6px" }}
+            className="h-4 w-4 rounded border-slate-600 bg-slate-950/80 text-brand-500 focus:ring-brand-500/40"
           />
           Show starred only
         </label>
       </div>
 
-      {/* CARD LIST */}
+      {/* Cards */}
       {filteredCards.length === 0 ? (
-        <p>No matching cards.</p>
+        <p className="text-sm text-slate-400">No matching cards.</p>
       ) : (
-        <ul>
+        <ul className="grid gap-4 md:grid-cols-2">
           {filteredCards.map((card) => (
             <li
               key={card.id}
@@ -313,97 +225,72 @@ export default function DeckDetails() {
               onDragOver={(e) => handleCardDragOver(e, card.id)}
               onDrop={handleCardDropOrEnd}
               onDragEnd={handleCardDropOrEnd}
-              style={{ marginBottom: "20px", cursor: "grab" }}
+              className="group cursor-grab rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-sm shadow-sm shadow-slate-950/40 transition hover:border-brand-500/70 hover:shadow-brand-500/20"
             >
-              {/* Title row with star */}
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <strong>{card.front_text}</strong>
-                <button
-                  onClick={() => toggleStar(card.id, card.starred)}
-                  style={{
-                    border: "none",
-                    background: "none",
-                    cursor: "pointer",
-                    fontSize: "18px"
-                  }}
-                  title={card.starred ? "Unstar" : "Star"}
-                >
-                  {card.starred ? "⭐" : "☆"}
-                </button>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <strong className="text-slate-50">
+                      {card.front_text}
+                    </strong>
+                    <button
+                      onClick={() => toggleStar(card.id, card.starred)}
+                      className="text-lg"
+                      title={card.starred ? 'Unstar' : 'Star'}
+                    >
+                      {card.starred ? '⭐' : '☆'}
+                    </button>
+                  </div>
+                  <p className="mt-1 text-slate-300">{card.back_text}</p>
+                </div>
               </div>
-
-              <div>{card.back_text}</div>
 
               {card.image_url && (
                 <img
                   src={card.image_url}
                   alt="Card"
-                  style={{
-                    width: "200px",
-                    marginTop: "10px",
-                    borderRadius: "8px",
-                    display: "block"
-                  }}
+                  className="mt-3 max-h-40 w-full rounded-xl object-cover"
                 />
               )}
 
-              {/* BUTTONS */}
-              <div
-                style={{
-                  marginTop: "10px",
-                  display: "flex",
-                  gap: "8px"
-                }}
-              >
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
                 <button
-                  style={{
-                    backgroundColor: "red",
-                    color: "white",
-                    padding: "4px 8px",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                  }}
                   onClick={async () => {
                     const { error } = await supabase
-                      .from("cards")
+                      .from('cards')
                       .delete()
-                      .eq("id", card.id);
+                      .eq('id', card.id);
 
                     if (!error) {
-                      setCards((prev) => prev.filter((c) => c.id !== card.id));
+                      setCards((prev) =>
+                        prev.filter((c) => c.id !== card.id),
+                      );
                     }
                   }}
+                  className="rounded-lg bg-red-500/90 px-3 py-1 text-xs font-semibold text-white hover:bg-red-400"
                 >
                   Delete
                 </button>
-
-                <a href={`/card/${card.id}/edit`}>
-                  <button
-                    style={{
-                      backgroundColor: "blue",
-                      color: "white",
-                      padding: "4px 8px",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer"
-                    }}
-                  >
-                    Edit
-                  </button>
-                </a>
+                <Link
+                  to={`/card/${card.id}/edit`}
+                  className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-950 hover:bg-white/90"
+                >
+                  Edit
+                </Link>
               </div>
             </li>
           ))}
         </ul>
       )}
 
-      {/* Add Card Button */}
-      <a href={`/deck/${id}/add-card`}>
-        <button>Add New Card</button>
-      </a>
+      <div className="pt-2">
+        <Link
+          to={`/deck/${id}/add-card`}
+          className="inline-flex items-center rounded-xl border border-dashed border-brand-500/70 bg-slate-950/60 px-4 py-2 text-xs font-semibold text-brand-200 hover:border-brand-400 hover:text-brand-100"
+        >
+          + Add new card
+        </Link>
+      </div>
     </div>
   );
 }
