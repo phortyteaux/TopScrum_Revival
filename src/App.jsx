@@ -15,6 +15,7 @@ import AddCard from './pages/AddCard';
 import EditCard from './pages/EditCard';
 import ReviewDeck from './pages/ReviewDeck';
 import DeckStats from './pages/DeckStats';
+import Contact from './pages/Contact'; // 👈 NEW
 
 import { useAuth } from './context/AuthContext';
 
@@ -27,7 +28,7 @@ function App() {
 
       <main className="mx-auto max-w-4xl w-full px-4 py-6">
         <Routes>
-          {/* Home is now a real landing page, always visible */}
+          {/* Public landing page */}
           <Route path="/" element={<Home />} />
 
           {/* Auth routes – bounce logged-in users to /decks */}
@@ -40,11 +41,11 @@ function App() {
             element={user ? <Navigate to="/decks" replace /> : <Signup />}
           />
 
-          {/* Alias for old /my-decks link (optional but convenient) */}
-          <Route
-            path="/my-decks"
-            element={<Navigate to="/decks" replace />}
-          />
+          {/* Contact – public page */}
+          <Route path="/contact" element={<Contact />} />
+
+          {/* Alias for old /my-decks link */}
+          <Route path="/my-decks" element={<Navigate to="/decks" replace />} />
 
           {/* Protected deck routes */}
           <Route
@@ -56,7 +57,7 @@ function App() {
             element={user ? <CreateDeck /> : <Navigate to="/login" replace />}
           />
 
-          {/* Single deck + cards (note: all use /deck/:id) */}
+          {/* Single deck + cards */}
           <Route
             path="/deck/:id"
             element={user ? <DeckDetails /> : <Navigate to="/login" replace />}

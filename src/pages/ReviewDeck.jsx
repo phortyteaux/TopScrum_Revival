@@ -135,7 +135,7 @@ export default function ReviewDeck() {
 
   if (cards.length === 0) {
     return (
-      <p className="text-center text-sm text-slate-400">
+      <p className="text-center text-sm text-slate-700 dark:text-slate-400">
         No cards to review in this deck.
       </p>
     );
@@ -150,11 +150,11 @@ export default function ReviewDeck() {
 
     return (
       <div className="mx-auto max-w-xl space-y-4 text-center">
-        <h2 className="text-2xl font-semibold text-slate-50">
+        <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
           Review complete! 🎉
         </h2>
 
-        <div className="mx-auto h-3 w-4/5 overflow-hidden rounded-full bg-slate-800">
+        <div className="mx-auto h-3 w-4/5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
           <div className="h-3 w-full bg-gradient-to-r from-brand-500 to-emerald-400" />
         </div>
 
@@ -169,25 +169,27 @@ export default function ReviewDeck() {
               setIncorrectCount(0);
               setIncorrectCardsList([]);
             }}
-            className="mt-2 inline-flex items-center justify-center rounded-xl bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-950 hover:bg-white/90"
+            className="mt-2 inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-50 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white/90"
           >
             Review incorrect only
           </button>
         )}
 
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-slate-700 dark:text-slate-300">
           You got{' '}
-          <span className="font-semibold text-emerald-300">
+          <span className="font-semibold text-emerald-600 dark:text-emerald-300">
             {correctCount} correct
           </span>{' '}
           and{' '}
-          <span className="font-semibold text-red-300">
+          <span className="font-semibold text-red-600 dark:text-red-300">
             {incorrectCount} incorrect
           </span>
           .
         </p>
 
-        <p className="text-3xl font-bold text-emerald-400">Score: {score}%</p>
+        <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+          Score: {score}%
+        </p>
 
         <button
           onClick={() => {
@@ -206,7 +208,7 @@ export default function ReviewDeck() {
         <div className="pt-2">
           <Link
             to={`/deck/${id}`}
-            className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-medium text-slate-100 hover:border-slate-500"
+            className="inline-flex items-center rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-xs font-medium text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500"
           >
             Back to deck
           </Link>
@@ -219,21 +221,23 @@ export default function ReviewDeck() {
 
   return (
     <div className="mx-auto max-w-xl space-y-4 text-center">
-      <h2 className="text-xl font-semibold text-slate-50">Reviewing deck</h2>
+      <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
+        Reviewing deck
+      </h2>
 
       {/* Toggles */}
       <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
-        <label className="flex items-center gap-2 text-slate-300">
+        <label className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
           <input
             type="checkbox"
             checked={shuffle}
             onChange={(e) => setShuffle(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-600 bg-slate-950/80 text-brand-500 focus:ring-brand-500/40"
+            className="h-4 w-4 rounded border-slate-400 bg-white text-brand-500 focus:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-950/80"
           />
           Shuffle cards
         </label>
 
-        <label className="flex items-center gap-2 text-slate-300">
+        <label className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
           <input
             type="checkbox"
             checked={multipleChoice}
@@ -245,21 +249,21 @@ export default function ReviewDeck() {
               setIncorrectCount(0);
               setShowBack(false);
             }}
-            className="h-4 w-4 rounded border-slate-600 bg-slate-950/80 text-brand-500 focus:ring-brand-500/40"
+            className="h-4 w-4 rounded border-slate-400 bg-white text-brand-500 focus:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-950/80"
           />
           Multiple choice mode
         </label>
       </div>
 
       {/* Progress bar */}
-      <div className="mx-auto h-2 w-4/5 overflow-hidden rounded-full bg-slate-800">
+      <div className="mx-auto h-2 w-4/5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
         <div
           className="h-2 bg-gradient-to-r from-brand-500 to-emerald-400 transition-[width] duration-300"
           style={{ width: `${progress}%` }}
         />
       </div>
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-slate-600 dark:text-slate-400">
         Card {index + 1} of {cards.length}
       </p>
 
@@ -275,19 +279,21 @@ export default function ReviewDeck() {
       {/* Multiple choice vs flip mode */}
       {multipleChoice ? (
         <>
-          <div className="mx-auto mt-2 flex min-h-[140px] max-w-xs items-center justify-center rounded-2xl border border-slate-700 bg-slate-950/80 px-4 py-6 text-lg font-semibold text-slate-50">
+          <div className="mx-auto mt-2 flex min-h-[140px] max-w-xs items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-6 text-lg font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-950/80 dark:text-slate-50">
             {card.front_text}
           </div>
 
           <div className="mx-auto flex w-full max-w-xs flex-col gap-2">
             {options.length === 0 ? (
-              <p className="text-xs text-slate-400">No options available.</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                No options available.
+              </p>
             ) : (
               options.map((opt, i) => (
                 <button
                   key={i}
                   onClick={() => handleChoiceClick(opt)}
-                  className="rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 hover:border-brand-500"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 hover:border-brand-500 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-brand-500"
                 >
                   {opt}
                 </button>
@@ -298,7 +304,7 @@ export default function ReviewDeck() {
       ) : (
         <>
           <div
-            className="mx-auto mt-2 flex min-h-[160px] max-w-xs cursor-pointer items-center justify-center rounded-2xl border border-slate-700 bg-slate-950/80 px-4 py-6 text-lg font-semibold text-slate-50"
+            className="mx-auto mt-2 flex min-h-[160px] max-w-xs cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-6 text-lg font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-950/80 dark:text-slate-50"
             onClick={() => setShowBack(!showBack)}
           >
             {showBack ? card.back_text : card.front_text}
@@ -307,7 +313,7 @@ export default function ReviewDeck() {
           <div className="flex justify-center gap-3">
             <button
               onClick={() => markCorrect(card.id)}
-              className="rounded-xl bg-emerald-500/90 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400"
+              className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400"
             >
               Correct
             </button>
@@ -326,7 +332,7 @@ export default function ReviewDeck() {
           <img
             src={card.image_url}
             alt="card"
-            className="mx-auto max-h-48 rounded-xl border border-slate-700 object-contain"
+            className="mx-auto max-h-48 rounded-xl border border-slate-200 object-contain dark:border-slate-700"
           />
         </div>
       )}

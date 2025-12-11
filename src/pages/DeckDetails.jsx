@@ -61,7 +61,7 @@ export default function DeckDetails() {
         .eq('user_id', user.id)
         .single();
 
-      if (!error) setDeck(data);
+    if (!error) setDeck(data);
     }
 
     if (user) fetchDeck();
@@ -82,7 +82,11 @@ export default function DeckDetails() {
   }, [id]);
 
   if (!deck) {
-    return <p className="text-sm text-slate-400">Loading deck...</p>;
+    return (
+      <p className="text-sm text-slate-700 dark:text-slate-400">
+        Loading deck...
+      </p>
+    );
   }
 
   const filteredCards = cards
@@ -136,10 +140,10 @@ export default function DeckDetails() {
       {/* Header / actions */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-50">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
             {deck.title}
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             {deck.description || 'No description'}
           </p>
         </div>
@@ -159,7 +163,7 @@ export default function DeckDetails() {
           </Link>
           <button
             onClick={exportDeck}
-            className="inline-flex items-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-1.5 font-medium text-slate-100 hover:border-slate-500"
+            className="inline-flex items-center rounded-xl border border-slate-300 bg-slate-50 px-3 py-1.5 font-medium text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500"
           >
             Export
           </button>
@@ -199,14 +203,14 @@ export default function DeckDetails() {
           placeholder="Search cards..."
           value={cardSearch}
           onChange={(e) => setCardSearch(e.target.value)}
-          className="w-full max-w-md rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-50 outline-none ring-brand-500/0 transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/40"
+          className="w-full max-w-md rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-brand-500/0 transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/40 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-50"
         />
-        <label className="flex items-center gap-2 text-xs text-slate-300">
+        <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
           <input
             type="checkbox"
             checked={showStarredOnly}
             onChange={(e) => setShowStarredOnly(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-600 bg-slate-950/80 text-brand-500 focus:ring-brand-500/40"
+            className="h-4 w-4 rounded border-slate-400 bg-white text-brand-500 focus:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-950/80"
           />
           Show starred only
         </label>
@@ -214,7 +218,9 @@ export default function DeckDetails() {
 
       {/* Cards */}
       {filteredCards.length === 0 ? (
-        <p className="text-sm text-slate-400">No matching cards.</p>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          No matching cards.
+        </p>
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
           {filteredCards.map((card) => (
@@ -225,12 +231,12 @@ export default function DeckDetails() {
               onDragOver={(e) => handleCardDragOver(e, card.id)}
               onDrop={handleCardDropOrEnd}
               onDragEnd={handleCardDropOrEnd}
-              className="group cursor-grab rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-sm shadow-sm shadow-slate-950/40 transition hover:border-brand-500/70 hover:shadow-brand-500/20"
+              className="group cursor-grab rounded-2xl border border-slate-200 bg-white p-4 text-sm shadow-sm transition hover:border-brand-500/70 hover:shadow-brand-500/20 dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-slate-950/40"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <strong className="text-slate-50">
+                    <strong className="text-slate-900 dark:text-slate-50">
                       {card.front_text}
                     </strong>
                     <button
@@ -241,7 +247,9 @@ export default function DeckDetails() {
                       {card.starred ? '⭐' : '☆'}
                     </button>
                   </div>
-                  <p className="mt-1 text-slate-300">{card.back_text}</p>
+                  <p className="mt-1 text-slate-700 dark:text-slate-300">
+                    {card.back_text}
+                  </p>
                 </div>
               </div>
 
@@ -273,7 +281,7 @@ export default function DeckDetails() {
                 </button>
                 <Link
                   to={`/card/${card.id}/edit`}
-                  className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-950 hover:bg-white/90"
+                  className="rounded-lg bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-50 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white/90"
                 >
                   Edit
                 </Link>
@@ -286,7 +294,7 @@ export default function DeckDetails() {
       <div className="pt-2">
         <Link
           to={`/deck/${id}/add-card`}
-          className="inline-flex items-center rounded-xl border border-dashed border-brand-500/70 bg-slate-950/60 px-4 py-2 text-xs font-semibold text-brand-200 hover:border-brand-400 hover:text-brand-100"
+          className="inline-flex items-center rounded-xl border border-dashed border-brand-500/70 bg-slate-50 px-4 py-2 text-xs font-semibold text-brand-600 hover:border-brand-400 hover:text-brand-500 dark:bg-slate-950/60 dark:text-brand-200 dark:hover:text-brand-100"
         >
           + Add new card
         </Link>

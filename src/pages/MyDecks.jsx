@@ -1,29 +1,27 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../context/AuthContext';
-import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
+import { useAuth } from "../context/AuthContext";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 export default function MyDecks() {
   const { user } = useAuth();
   const [decks, setDecks] = useState([]);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [selectedDecks, setSelectedDecks] = useState([]);
   const [draggedDeckId, setDraggedDeckId] = useState(null);
 
-  // --- helpers from your original file (UNCHANGED logic) ---
-
   async function fetchDeckData(deckId) {
     const { data: deck } = await supabase
-      .from('decks')
-      .select('*')
-      .eq('id', deckId)
+      .from("decks")
+      .select("*")
+      .eq("id", deckId)
       .single();
 
     const { data: cards } = await supabase
-      .from('cards')
-      .select('*')
-      .eq('deck_id', deckId);
+      .from("cards")
+      .select("*")
+      .eq("deck_id", deckId);
 
     return { ...deck, cards };
   }
@@ -32,19 +30,19 @@ export default function MyDecks() {
     const data = await fetchDeckData(deck.id);
 
     const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
+    const blob = new Blob([json], { type: "application/json" });
 
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `${deck.title.replace(/\s+/g, '_')}_deck.json`;
+    a.download = `${deck.title.replace(/\s+/g, "_")}_deck.json`;
     a.click();
 
     URL.revokeObjectURL(url);
   }
 
   async function exportSelected() {
-    if (selectedDecks.length === 0) return alert('No decks selected.');
+    if (selectedDecks.length === 0) return alert("No decks selected.");
 
     const zip = new JSZip();
 
@@ -53,13 +51,13 @@ export default function MyDecks() {
       const data = await fetchDeckData(deckId);
 
       zip.file(
-        `${deck.title.replace(/\s+/g, '_')}.json`,
-        JSON.stringify(data, null, 2),
+        `${deck.title.replace(/\s+/g, "_")}.json`,
+        JSON.stringify(data, null, 2)
       );
     }
 
-    const blob = await zip.generateAsync({ type: 'blob' });
-    saveAs(blob, 'exported_decks.zip');
+    const blob = await zip.generateAsync({ type: "blob" });
+    saveAs(blob, "exported_decks.zip");
   }
 
   async function importDeck(event) {
@@ -71,7 +69,7 @@ export default function MyDecks() {
       const data = JSON.parse(text);
 
       const { data: newDeck } = await supabase
-        .from('decks')
+        .from("decks")
         .insert({
           user_id: user.id,
           title: data.title,
@@ -88,13 +86,13 @@ export default function MyDecks() {
       }));
 
       if (cardInserts.length > 0) {
-        await supabase.from('cards').insert(cardInserts);
+        await supabase.from("cards").insert(cardInserts);
       }
 
-      alert('Deck imported!');
+      alert("Deck imported!");
       window.location.reload();
     } catch {
-      alert('Invalid JSON file.');
+      alert("Invalid JSON file.");
     }
   }
 
@@ -103,14 +101,14 @@ export default function MyDecks() {
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('decks')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('order_index', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: false });
+        .from("decks")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("order_index", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: false });
 
       if (error) {
-        console.error('Error loading decks:', error);
+        console.error("Error loading decks:", error);
         return;
       }
 
@@ -121,25 +119,25 @@ export default function MyDecks() {
   }, [user]);
 
   const filteredDecks = decks.filter((deck) =>
-    deck.title.toLowerCase().includes(search.toLowerCase()),
+    deck.title.toLowerCase().includes(search.toLowerCase())
   );
 
   async function deleteDeck(id) {
-    const ok = confirm('Delete this deck?');
+    const ok = confirm("Delete this deck?");
     if (!ok) return;
 
-    await supabase.from('decks').delete().eq('id', id);
+    await supabase.from("decks").delete().eq("id", id);
     setDecks((prev) => prev.filter((d) => d.id !== id));
     setSelectedDecks((prev) => prev.filter((x) => x !== id));
   }
 
   async function deleteSelected() {
-    if (selectedDecks.length === 0) return alert('No decks selected.');
+    if (selectedDecks.length === 0) return alert("No decks selected.");
 
-    const ok = confirm('Delete ALL selected decks?');
+    const ok = confirm("Delete ALL selected decks?");
     if (!ok) return;
 
-    await supabase.from('decks').delete().in('id', selectedDecks);
+    await supabase.from("decks").delete().in("id", selectedDecks);
 
     setDecks((prev) => prev.filter((d) => !selectedDecks.includes(d.id)));
     setSelectedDecks([]);
@@ -147,7 +145,7 @@ export default function MyDecks() {
 
   function toggleDeck(id) {
     setSelectedDecks((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   }
 
@@ -189,17 +187,17 @@ export default function MyDecks() {
     }));
 
     const { error } = await supabase
-      .from('decks')
-      .upsert(updates, { onConflict: 'id' });
+      .from("decks")
+      .upsert(updates, { onConflict: "id" });
 
     if (error) {
-      console.error('Error saving deck order:', error);
+      console.error("Error saving deck order:", error);
     }
   }
 
   if (!user) {
     return (
-      <p className="text-center text-sm text-slate-400">
+      <p className="text-center text-sm text-slate-700 dark:text-slate-400">
         Log in to see your decks.
       </p>
     );
@@ -209,14 +207,18 @@ export default function MyDecks() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-slate-50">My decks</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">
+            My decks
+          </h2>
+          <p className="text-xs text-slate-600 dark:text-slate-400">
             Drag to reorder. Export / import to share with teammates.
           </p>
         </div>
 
-        <label className="inline-flex cursor-pointer items-center rounded-full border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-slate-100 shadow-sm hover:border-slate-500">
-          <span className="mr-2 text-slate-300">Import deck</span>
+        <label className="inline-flex cursor-pointer items-center rounded-full border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-900 shadow-sm hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:border-slate-500">
+          <span className="mr-2 text-slate-700 dark:text-slate-300">
+            Import deck
+          </span>
           <input
             type="file"
             accept=".json"
@@ -230,13 +232,13 @@ export default function MyDecks() {
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <button
           onClick={selectAll}
-          className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1.5 hover:border-slate-500"
+          className="rounded-full border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500"
         >
           Select all
         </button>
         <button
           onClick={clearSelection}
-          className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1.5 hover:border-slate-500"
+          className="rounded-full border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500"
         >
           Clear
         </button>
@@ -248,7 +250,7 @@ export default function MyDecks() {
         </button>
         <button
           onClick={exportSelected}
-          className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-slate-950 hover:bg-white/90"
+          className="rounded-full bg-slate-900 px-3 py-1.5 font-medium text-slate-50 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white/90"
         >
           Export selected
         </button>
@@ -261,13 +263,13 @@ export default function MyDecks() {
           placeholder="Search decks..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-50 outline-none ring-brand-500/0 transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/40"
+          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-brand-500/0 transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/40 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-50"
         />
       </div>
 
       {/* Deck list */}
       {filteredDecks.length === 0 ? (
-        <p className="pt-4 text-sm text-slate-400">
+        <p className="pt-4 text-sm text-slate-600 dark:text-slate-400">
           No decks match your search. Try a different keyword.
         </p>
       ) : (
@@ -280,9 +282,12 @@ export default function MyDecks() {
               onDragOver={(e) => handleDeckDragOver(e, deck.id)}
               onDrop={handleDeckDropOrEnd}
               onDragEnd={handleDeckDropOrEnd}
-              className="group flex cursor-grab flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-left shadow-sm shadow-slate-950/40 transition hover:border-brand-500/70 hover:shadow-brand-500/20"
+              className="group flex cursor-grab flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-brand-500/70 hover:shadow-brand-500/20 dark:border-slate-800 dark:bg-slate-900/60 dark:shadow-slate-950/40"
               onClick={(e) => {
-                if (e.target.tagName === 'BUTTON' || e.target.type === 'checkbox')
+                if (
+                  e.target.tagName === "BUTTON" ||
+                  e.target.type === "checkbox"
+                )
                   return;
                 window.location.href = `/deck/${deck.id}`;
               }}
@@ -292,22 +297,24 @@ export default function MyDecks() {
                   type="checkbox"
                   checked={selectedDecks.includes(deck.id)}
                   onChange={() => toggleDeck(deck.id)}
-                  className="mt-1 h-4 w-4 rounded border-slate-600 bg-slate-950/80 text-brand-500 focus:ring-brand-500/40"
+                  className="mt-1 h-4 w-4 rounded border-slate-400 bg-white text-brand-500 focus:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-950/80"
                 />
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-50">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
                     {deck.title}
                   </h3>
-                  <p className="mt-1 line-clamp-2 text-xs text-slate-400">
-                    {deck.description || 'No description'}
+                  <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-slate-400">
+                    {deck.description || "No description"}
                   </p>
                 </div>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
-                  onClick={() => window.location.href = `/deck/${deck.id}/review`}
-                  className="inline-flex flex-1 items-center justify-center rounded-xl bg-emerald-400 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-emerald-300"
+                  onClick={() =>
+                    (window.location.href = `/deck/${deck.id}/review`)
+                  }
+                  className="inline-flex flex-1 items-center justify-center rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-emerald-400"
                 >
                   Review
                 </button>
@@ -319,7 +326,7 @@ export default function MyDecks() {
                 </button>
                 <button
                   onClick={() => exportDeck(deck)}
-                  className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-1.5 text-xs font-medium text-slate-100 hover:border-slate-500"
+                  className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-800 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500"
                 >
                   Export
                 </button>
