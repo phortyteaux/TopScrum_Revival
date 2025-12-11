@@ -13,13 +13,11 @@ vi.mock('../context/AuthContext', () => ({
 const decksSelectChain = {
   eq: vi.fn(() => decksSelectChain),
   order: vi.fn(() => decksSelectChain),
-  // Make this object "await"-able:
   then: (resolve) => resolve({ data: [], error: null }),
 };
 
 const decksTable = {
   select: vi.fn(() => decksSelectChain),
-  // Insert/delete/update are stubbed but not asserted in these tests
   insert: vi.fn(() => ({
     select: vi.fn(() => ({
       single: vi.fn(() =>
@@ -52,9 +50,6 @@ beforeEach(() => {
   decksTable.select.mockClear();
 });
 
-/**
- * Helper to simulate a file input "change" event.
- */
 function createFile(contents, name = 'deck.json', type = 'application/json') {
   return new File([contents], name, { type });
 }
@@ -72,7 +67,6 @@ describe('MyDecks basic behavior & error handling', () => {
     const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
     render(<MyDecks />);
 
-    // Find the hidden file input via its "Import deck" label
     const label = screen.getByText(/Import deck/i).closest('label');
     const input = label.querySelector('input[type="file"]');
 
@@ -80,8 +74,6 @@ describe('MyDecks basic behavior & error handling', () => {
 
     fireEvent.change(input, { target: { files: [badFile] } });
 
-    // Expect alert for invalid JSON
-    // No need for waitFor here because file.text() will run quickly
     expect(alertMock).toHaveBeenCalledWith('Invalid JSON file.');
 
     alertMock.mockRestore();
