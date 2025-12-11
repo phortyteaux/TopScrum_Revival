@@ -1,9 +1,9 @@
 // src/components/Navbar.jsx
-import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import React from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { supabase } from "../lib/supabaseClient";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -11,11 +11,11 @@ export default function Navbar() {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
 
-  const onHomePage = location.pathname === '/';
+  const onHomePage = location.pathname === "/";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
@@ -25,10 +25,15 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <Link
             to="/"
-            className="text-lg font-semibold text-brand-400 hover:text-brand-300"
+            className={`text-lg font-semibold px-2 py-0.5 rounded-md transition-colors ${
+              theme === "dark"
+                ? "text-brand-300 hover:text-brand-200 bg-slate-900/80"
+                : "text-brand-700 hover:text-brand-900 bg-slate-100"
+            }`}
           >
             TopScrum
           </Link>
+
           <span className="hidden text-xs text-slate-500 sm:inline">
             Flashcards
           </span>
@@ -42,9 +47,9 @@ export default function Navbar() {
             onClick={toggleTheme}
             className="flex items-center gap-1 rounded-full border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200 shadow-sm hover:border-brand-400"
           >
-            <span>{theme === 'dark' ? '🌙' : '☀️'}</span>
+            <span>{theme === "dark" ? "🌙" : "☀️"}</span>
             <span className="hidden sm:inline">
-              {theme === 'dark' ? 'Dark' : 'Light'}
+              {theme === "dark" ? "Dark" : "Light"}
             </span>
           </button>
 
