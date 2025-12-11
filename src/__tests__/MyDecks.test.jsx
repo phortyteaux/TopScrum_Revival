@@ -1,93 +1,93 @@
 // src/__tests__/MyDecks.test.jsx
-import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import MyDecks from '../pages/MyDecks';
+import React from "react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 
-vi.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ user: { id: 'test-user-id', email: 'user@test.com' } }),
+vi.mock("../context/AuthContext", () => ({
+  useAuth: () => ({
+    user: { id: "test-user-id" },
+  }),
 }));
 
+vi.mock("../lib/supabaseClient", () => {
+  const chain = {
+    data: [],
+    error: null,
+  };
 
+  chain.select = vi.fn(() => chain);
+  chain.eq = vi.fn(() => chain);
+  chain.order = vi.fn(() => chain); 
+  chain.delete = vi.fn(() => chain);
+  chain.in = vi.fn(() => chain);
+  chain.upsert = vi.fn(() => chain);
 
-const decksSelectChain = {
-  eq: vi.fn(() => decksSelectChain),
-  order: vi.fn(() => decksSelectChain),
-  then: (resolve) => resolve({ data: [], error: null }),
-};
-
-const decksTable = {
-  select: vi.fn(() => decksSelectChain),
-  insert: vi.fn(() => ({
-    select: vi.fn(() => ({
-      single: vi.fn(() =>
-        Promise.resolve({ data: { id: 'new-deck-id' }, error: null }),
-      ),
-    })),
-  })),
-  delete: vi.fn(() => ({
-    in: vi.fn(() => Promise.resolve({ error: null })),
-    eq: vi.fn(() => Promise.resolve({ error: null })),
-  })),
-  update: vi.fn(() => ({
-    eq: vi.fn(() => Promise.resolve({ error: null })),
-  })),
-};
-
-const cardsTable = {
-  insert: vi.fn(() => Promise.resolve({ error: null })),
-};
-
-vi.mock('../lib/supabaseClient', () => ({
-  supabase: {
-    from: (table) => (table === 'decks' ? decksTable : cardsTable),
-  },
-}));
-
-beforeEach(() => {
-  decksSelectChain.eq.mockClear();
-  decksSelectChain.order.mockClear();
-  decksTable.select.mockClear();
+  return {
+    supabase: {
+      from: vi.fn(() => chain),
+    },
+  };
 });
 
-function createFile(contents, name = 'deck.json', type = 'application/json') {
-  return new File([contents], name, { type });
+import MyDecks from "../pages/MyDecks.jsx";
+
+function renderMyDecks() {
+  return render(
+    <MemoryRouter>
+      <MyDecks />
+    </MemoryRouter>
+  );
 }
 
-describe('MyDecks basic behavior & error handling', () => {
-  it('renders the "My decks" heading', () => {
-    render(<MyDecks />);
+let alertSpy;
 
-    expect(
-      screen.getByRole('heading', { name: /My decks/i }),
-    ).toBeInTheDocument();
+beforeEach(() => {
+  alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+});
+
+afterEach(() => {
+  alertSpy.mockRestore();
+});
+
+// --- Tests ---
+
+describe("MyDecks basic behavior & error handling", () => {
+  it('renders the "My decks" heading', async () => {
+    renderMyDecks();
+
+    const heading = await screen.findByText(/My decks/i);
+    expect(heading).toBeInTheDocument();
   });
 
-  it('shows error for invalid JSON file (TC1.5)', async () => {
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
-    render(<MyDecks />);
+  it("shows error for invalid JSON file (TC1.5)", async () => {
+    renderMyDecks();
 
-    const label = screen.getByText(/Import deck/i).closest('label');
-    const input = label.querySelector('input[type="file"]');
+    const importLabel = screen.getByText(/Import deck/i).closest("label");
+    expect(importLabel).not.toBeNull();
 
-    const badFile = createFile('{ this is invalid JSON }');
+    const fileInput = importLabel.querySelector('input[type="file"]');
+    expect(fileInput).not.toBeNull();
 
-    fireEvent.change(input, { target: { files: [badFile] } });
+    const badFile = new File(["{ invalid json"], "invalid.json", {
+      type: "application/json",
+    });
 
-    expect(alertMock).toHaveBeenCalledWith('Invalid JSON file.');
+    fireEvent.change(fileInput, {
+      target: { files: [badFile] },
+    });
 
-    alertMock.mockRestore();
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith("Invalid JSON file.");
+    });
   });
 
-  it('alerts when trying to delete with no decks selected (TC2.2)', () => {
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
-    render(<MyDecks />);
+  it("alerts when trying to delete with no decks selected (TC2.2)", async () => {
+    renderMyDecks();
 
-    const deleteSelectedButton = screen.getByText(/Delete selected/i);
-    fireEvent.click(deleteSelectedButton);
+    const deleteButton = await screen.findByText(/Delete selected/i);
+    fireEvent.click(deleteButton);
 
-    expect(alertMock).toHaveBeenCalledWith('No decks selected.');
-
-    alertMock.mockRestore();
+    expect(alertSpy).toHaveBeenCalledWith("No decks selected.");
   });
 });
