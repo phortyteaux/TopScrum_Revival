@@ -7,14 +7,14 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import Decks from './pages/MyDecks';
+import MyDecks from './pages/MyDecks';
 import CreateDeck from './pages/CreateDeck';
 import DeckDetails from './pages/DeckDetails';
 import EditDeck from './pages/EditDeck';
-import ReviewDeck from './pages/ReviewDeck';
-import DeckStats from './pages/DeckStats';
 import AddCard from './pages/AddCard';
 import EditCard from './pages/EditCard';
+import ReviewDeck from './pages/ReviewDeck';
+import DeckStats from './pages/DeckStats';
 
 import { useAuth } from './context/AuthContext';
 
@@ -27,13 +27,10 @@ function App() {
 
       <main className="mx-auto max-w-4xl w-full px-4 py-6">
         <Routes>
-          {/* Landing route */}
-          <Route
-            path="/"
-            element={user ? <Navigate to="/decks" replace /> : <Home />}
-          />
+          {/* Home is now a real landing page, always visible */}
+          <Route path="/" element={<Home />} />
 
-          {/* Auth routes – only show if NOT logged in */}
+          {/* Auth routes – bounce logged-in users to /decks */}
           <Route
             path="/login"
             element={user ? <Navigate to="/decks" replace /> : <Login />}
@@ -43,23 +40,23 @@ function App() {
             element={user ? <Navigate to="/decks" replace /> : <Signup />}
           />
 
-          {/* Deck list (support both /decks and /my-decks) */}
-          <Route
-            path="/decks"
-            element={user ? <Decks /> : <Navigate to="/login" replace />}
-          />
+          {/* Alias for old /my-decks link (optional but convenient) */}
           <Route
             path="/my-decks"
-            element={user ? <Decks /> : <Navigate to="/login" replace />}
+            element={<Navigate to="/decks" replace />}
           />
 
-          {/* Create deck */}
+          {/* Protected deck routes */}
+          <Route
+            path="/decks"
+            element={user ? <MyDecks /> : <Navigate to="/login" replace />}
+          />
           <Route
             path="/decks/new"
             element={user ? <CreateDeck /> : <Navigate to="/login" replace />}
           />
 
-          {/* Single deck + actions – note: /deck/:id (singular) */}
+          {/* Single deck + cards (note: all use /deck/:id) */}
           <Route
             path="/deck/:id"
             element={user ? <DeckDetails /> : <Navigate to="/login" replace />}
@@ -69,6 +66,10 @@ function App() {
             element={user ? <EditDeck /> : <Navigate to="/login" replace />}
           />
           <Route
+            path="/deck/:id/add-card"
+            element={user ? <AddCard /> : <Navigate to="/login" replace />}
+          />
+          <Route
             path="/deck/:id/review"
             element={user ? <ReviewDeck /> : <Navigate to="/login" replace />}
           />
@@ -76,18 +77,14 @@ function App() {
             path="/deck/:id/stats"
             element={user ? <DeckStats /> : <Navigate to="/login" replace />}
           />
-          <Route
-            path="/deck/:id/add-card"
-            element={user ? <AddCard /> : <Navigate to="/login" replace />}
-          />
 
-          {/* Card edit */}
+          {/* Edit a single card */}
           <Route
             path="/card/:id/edit"
             element={user ? <EditCard /> : <Navigate to="/login" replace />}
           />
 
-          {/* Catch-all */}
+          {/* Catch-all: go to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

@@ -307,7 +307,7 @@ export default function MyDecks() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   onClick={() => window.location.href = `/deck/${deck.id}/review`}
-                  className="inline-flex flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-brand-500 to-emerald-400 px-3 py-1.5 text-xs font-semibold text-slate-950 hover:from-brand-400 hover:to-emerald-300"
+                  className="inline-flex flex-1 items-center justify-center rounded-xl bg-emerald-400 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-emerald-300"
                 >
                   Review
                 </button>
